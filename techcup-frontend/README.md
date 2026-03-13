@@ -12,7 +12,7 @@ Realizar una pagina web que permita gestionar todo lo relacionado con la organiz
 Sistemas para facilitar su planeación y desarrollo.
 
 ## 🎨 Logotipo
-![Captura de pantalla 2026-03-11 184416.png](../../Captura%20de%20pantalla%202026-03-11%20184416.png)
+![Captura de pantalla 2026-03-11 184416.png](recursos/Captura%20de%20pantalla%202026-03-11%20184416.png)
 
 
 ## 📖 Manual de identidad visual
