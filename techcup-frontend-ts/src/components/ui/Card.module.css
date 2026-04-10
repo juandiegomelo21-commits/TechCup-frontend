@@ -1,0 +1,12 @@
+.card { background: var(--color-white); border: 1px solid var(--color-border); border-radius: var(--radius-lg); overflow: hidden; }
+.shadow { box-shadow: var(--shadow-md); }
+.clickable { cursor: pointer; transition: box-shadow 0.2s, transform 0.15s; }
+.clickable:hover { box-shadow: var(--shadow-lg); transform: translateY(-1px); }
+
+.header { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-4); border-bottom: 1px solid var(--color-border); }
+.title    { font-family: var(--font-heading); font-size: 1rem; font-weight: 700; color: var(--color-carbon); }
+.subtitle { font-size: 0.8125rem; color: var(--color-carbon-light); margin-top: var(--space-1); }
+
+.psm .header, .psm .body { padding: var(--space-3); }
+.pmd .header, .pmd .body { padding: var(--space-6); }
+.plg .header, .plg .body { padding: var(--space-8); }

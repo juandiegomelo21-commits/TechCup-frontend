@@ -1,0 +1,170 @@
+.page { display: flex; flex-direction: column; gap: 1.25rem; }
+
+/* ── Rows ── */
+.topRow    { display: grid; grid-template-columns: 2fr 1fr; gap: 1.25rem; }
+.bottomRow { display: grid; grid-template-columns: 1fr 1fr;  gap: 1.25rem; }
+
+/* ── Glass card base ── */
+.glassCard {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: 18px; overflow: hidden;
+  display: flex; flex-direction: column;
+}
+
+/* ── Amber header strip ── */
+.amberHeader {
+  background: var(--color-amber);
+  padding: 0.875rem 1.25rem;
+  font-family: var(--font-heading); font-weight: 700;
+  font-size: 0.9375rem; color: #1a3020;
+}
+
+/* ── Team body ── */
+.teamBody {
+  padding: 1.25rem;
+  display: flex; align-items: center; gap: 1.25rem;
+  flex: 1;
+}
+
+.shieldWrap {
+  display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+  flex-shrink: 0;
+}
+.rolePill {
+  padding: 0.2rem 0.7rem;
+  background: rgba(240,177,0,0.2);
+  border: 1px solid var(--color-amber);
+  border-radius: var(--radius-full);
+  font-size: 0.7rem; font-weight: 700;
+  color: var(--color-amber);
+  font-family: var(--font-heading);
+}
+
+.teamStats { flex: 1; display: flex; flex-direction: column; gap: 0.5rem; }
+.teamStatRow  { display: flex; justify-content: space-between; align-items: center; }
+.teamStatLabel { font-size: 0.8rem; color: rgba(255,255,255,0.6); }
+.teamStatValue { font-family: var(--font-heading); font-weight: 700; font-size: 0.875rem; }
+.teamStatSub   { font-size: 0.72rem; color: rgba(255,255,255,0.45); }
+
+.progressWrap { }
+.progressBar  {
+  height: 6px; border-radius: 99px;
+  background: rgba(255,255,255,0.1);
+  overflow: hidden;
+}
+.progressFill {
+  height: 100%; border-radius: 99px;
+  background: var(--color-amber);
+  transition: width 0.4s ease;
+}
+
+/* ── Profile shortcut card ── */
+.profileCard {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: 18px; overflow: hidden;
+  display: flex; flex-direction: column;
+  text-decoration: none;
+  transition: transform 0.18s, box-shadow 0.18s;
+}
+.profileCard:hover { transform: translateY(-3px); box-shadow: 0 8px 28px rgba(0,0,0,0.3); }
+
+.profileHeader {
+  background: var(--color-amber);
+  padding: 0.875rem 1.25rem;
+}
+.profileTitle {
+  font-family: var(--font-heading); font-weight: 700;
+  font-size: 0.9375rem; color: #1a3020;
+}
+
+.profileAvatar {
+  flex: 1;
+  display: flex; align-items: center; justify-content: center;
+  padding: 1.5rem;
+}
+
+.profileFooter {
+  padding: 0.875rem 1.25rem;
+  border-top: 1px solid var(--glass-border);
+  text-align: center;
+}
+
+/* ── Invitation list ── */
+.inviteList { padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.625rem; flex: 1; }
+
+.inviteRow {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 0.75rem;
+  padding: 0.75rem;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+}
+
+.inviteInfo { display: flex; flex-direction: column; gap: 0.15rem; }
+.inviteTeam { font-family: var(--font-heading); font-weight: 700; font-size: 0.9rem; color: #fff; }
+.inviteCapt { font-size: 0.75rem; color: rgba(255,255,255,0.55); }
+.inviteDate { font-size: 0.7rem; color: rgba(255,255,255,0.4); margin-top: 0.15rem; }
+
+.inviteActions { display: flex; flex-direction: column; align-items: flex-end; gap: 0.4rem; flex-shrink: 0; }
+.statusPill {
+  padding: 0.2rem 0.65rem;
+  border-radius: var(--radius-full);
+  font-size: 0.7rem; font-weight: 700;
+  font-family: var(--font-heading);
+}
+.inviteBtns { display: flex; gap: 0.35rem; }
+.acceptBtn {
+  padding: 0.3rem 0.75rem;
+  background: rgba(0,201,80,0.2);
+  border: 1px solid #00c950;
+  border-radius: 8px;
+  font-size: 0.75rem; font-weight: 700;
+  color: #00c950; cursor: pointer;
+  transition: background 0.15s;
+}
+.acceptBtn:hover { background: rgba(0,201,80,0.35); }
+.rejectBtn {
+  padding: 0.3rem 0.75rem;
+  background: rgba(231,76,60,0.15);
+  border: 1px solid rgba(231,76,60,0.5);
+  border-radius: 8px;
+  font-size: 0.75rem; font-weight: 700;
+  color: #e74c3c; cursor: pointer;
+  transition: background 0.15s;
+}
+.rejectBtn:hover { background: rgba(231,76,60,0.28); }
+
+/* ── Stats section ── */
+.statsGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; padding: 1rem; }
+.statCard {
+  border-radius: 12px;
+  padding: 0.875rem 0.5rem;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid transparent;
+  display: flex; flex-direction: column; align-items: center; gap: 0.2rem; text-align: center;
+}
+.statNum   { font-family: var(--font-heading); font-weight: 700; font-size: 1.5rem; }
+.statLabel { font-size: 0.72rem; color: rgba(255,255,255,0.65); }
+
+.divider { height: 1px; background: rgba(255,255,255,0.12); margin: 0 1rem; }
+
+.availBox {
+  padding: 0.875rem 1rem;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.availLabel { font-size: 0.8rem; color: rgba(255,255,255,0.6); }
+.availLink {
+  display: flex; align-items: center; gap: 0.4rem;
+  font-size: 0.8rem; color: var(--color-amber);
+  text-decoration: none; font-weight: 600;
+  transition: opacity 0.15s;
+}
+.availLink:hover { opacity: 0.75; }
+.availDot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #2ECC71; flex-shrink: 0;
+}

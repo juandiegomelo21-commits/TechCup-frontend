@@ -1,0 +1,110 @@
+.root {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background-color: var(--color-emerald-bg);
+}
+
+.bgImage {
+  position: absolute;
+  inset: 0;
+  background-image: url('/assets/landing-bg.jpg');
+  background-size: cover;
+  background-position: center;
+  opacity: 0.4;
+  z-index: 0;
+}
+
+.bgOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 40, 25, 0.55) 0%,
+    rgba(0, 20, 12, 0.75) 100%
+  );
+  z-index: 1;
+}
+
+/* ECIJ top-right */
+.topRight {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.5rem;
+  z-index: 3;
+}
+.ecijLogo {
+  height: 56px;
+  width: auto;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+  opacity: 0.85;
+}
+
+/* Center */
+.center {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  text-align: center;
+  padding: 2rem;
+}
+
+.logoWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 160px;
+}
+.logo {
+  max-height: 160px;
+  max-width: 340px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 24px rgba(0,0,0,0.5));
+}
+.logoFallback {
+  font-family: var(--font-heading);
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--color-amber);
+  letter-spacing: 0.08em;
+  text-shadow: 0 2px 16px rgba(0,0,0,0.5);
+}
+
+.tagline {
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.25;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.4);
+}
+
+.ctaBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 3rem;
+  background: var(--color-amber);
+  border-radius: var(--radius-full);
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1rem;
+  color: #1a3020;
+  text-decoration: none;
+  box-shadow: 0 4px 20px rgba(255, 191, 0, 0.35);
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+}
+.ctaBtn:hover {
+  background: var(--color-amber-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(255, 191, 0, 0.45);
+  color: #1a3020;
+}
