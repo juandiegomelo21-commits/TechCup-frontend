@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import WelcomePage from './Pages/WelcomePage';
 import LoginPage from './Pages/LoginPage';
 import RegisterPage from './Pages/RegisterPage';
-import DashboardJugador from './Pages/DashBoard/DashboardJugador';
+import DashboardOrganizador from './Pages/DashBoard/DashboardOrganizador';
 
 function App() {
   return (
@@ -11,7 +11,7 @@ function App() {
         <Route path="/" element={<WelcomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        <Route path="/dashboard" element={<DashboardJugador />} />
+        <Route path="/dashboard" element={<DashboardOrganizador />} />
       </Routes>
     </BrowserRouter>
   );
