@@ -5,8 +5,10 @@ import RegisterPage from './Pages/RegisterPage';
 import DashboardJugador from './Pages/DashBoard/DashboardJugador';
 import AccountCreatedPage from './Pages/AccountCreatedPage';
 import EmailSentPage from './Pages/EmailSentPage';
-import ForgotPasswordPage from './Pages/ForgotPasswordPage'
-import PlayerProfilePage from './Pages/PlayerProfilePage'
+import ForgotPasswordPage from './Pages/ForgotPasswordPage';
+import PlayerProfilePage from './Pages/PlayerProfilePage';
+import PlayerSearchPage from './Pages/PlayerSearchPage';
+
 
 function App() {
   return (
@@ -20,6 +22,7 @@ function App() {
         <Route path="/email-sent" element={<EmailSentPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/player-profile" element={<PlayerProfilePage />} />
+        <Route path="/player-search" element={<PlayerSearchPage />} />
 
       </Routes>
     </BrowserRouter>
