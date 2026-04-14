@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import Button from '../Components/Button';
+import Button from '../Components/ui/Button';
 import logo from '../assets/Logo.png';
 import logoEscuela from '../assets/LogoEscuela.png';
 import backgroundVideo from '../assets/backgroundVideo.mp4';

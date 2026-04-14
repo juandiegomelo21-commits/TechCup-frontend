@@ -35,11 +35,12 @@ const LoginPage = () => {
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
-      navigate('/dashboard'); // te lleva al dashboard
+      navigate('/dashboard');
     }, 1500);
   };
 
   return (
+    // Línea 40 — contenedor principal
     <div style={{
       width: '100vw',
       height: '100vh',
@@ -49,10 +50,10 @@ const LoginPage = () => {
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: '16px',
+      padding: 'clamp(8px, 2vh, 16px)',
     }}>
 
-      {/* Fondo verde */}
+      {/* Línea 52 — Fondo verde */}
       <div style={{
         position: 'absolute',
         inset: 0,
@@ -60,7 +61,7 @@ const LoginPage = () => {
         zIndex: 0,
       }} />
 
-      {/* Cristiano detrás de toda la pantalla */}
+      {/* Línea 59 — Cristiano */}
       <img
         src={cristiano}
         alt="Jugador"
@@ -77,7 +78,7 @@ const LoginPage = () => {
         }}
       />
 
-      {/* Capa oscura */}
+      {/* Línea 74 — Capa oscura */}
       <div style={{
         position: 'absolute',
         inset: 0,
@@ -85,7 +86,7 @@ const LoginPage = () => {
         zIndex: 2,
       }} />
 
-      {/* Volver */}
+      {/* Línea 82 — Volver */}
       <div
         onClick={() => navigate('/')}
         style={{
@@ -99,44 +100,45 @@ const LoginPage = () => {
           gap: '4px',
           position: 'relative',
           zIndex: 10,
-          marginBottom: '8px',
+          marginBottom: 'clamp(4px, 1vh, 8px)',
         }}
       >
         ← Volver
       </div>
 
+      {/* Línea 101 — Logo */}
       <img
         src={logo}
         alt="TechUp Fútbol"
         style={{
-          width: 'clamp(100px, 18vw, 150px)',
-          marginBottom: '8px',
+          width: 'clamp(70px, 12vh, 130px)',
+          marginBottom: 'clamp(4px, 1vh, 10px)',
           position: 'relative',
           zIndex: 10,
           alignSelf: 'center',
         }}
       />
 
-      {/* Card */}
+      {/* Línea 112 — Card */}
       <div style={{
         backgroundColor: 'rgba(220, 235, 225, 0.92)',
         borderRadius: '16px',
-        padding: 'clamp(24px, 4vw, 36px)',
+        padding: 'clamp(12px, 2.5vh, 28px) clamp(16px, 3vw, 32px)',
         width: '100%',
         maxWidth: '400px',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        gap: '14px',
+        gap: 'clamp(8px, 1.5vh, 14px)',
         boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
         position: 'relative',
         zIndex: 10,
       }}>
 
-        {/* Icono azul dos personas SVG */}
+        {/* Línea 127 — Icono usuarios */}
         <div style={{
-          width: '56px',
-          height: '56px',
+          width: 'clamp(40px, 6vh, 56px)',
+          height: 'clamp(40px, 6vh, 56px)',
           borderRadius: '50%',
           backgroundColor: '#e8f0fe',
           display: 'flex',
@@ -151,23 +153,24 @@ const LoginPage = () => {
           </svg>
         </div>
 
+        {/* Línea 143 — Título */}
         <h2 style={{
           fontFamily: "'Montserrat', sans-serif",
           fontWeight: 'bold',
-          fontSize: 'clamp(20px, 3vw, 24px)',
+          fontSize: 'clamp(18px, 2.5vh, 24px)',
           color: '#1a1a1a',
           margin: 0,
         }}>
           Iniciar Sesión
         </h2>
 
-        {/* Campo email */}
+        {/* Línea 153 — Campo email */}
         <div style={{ width: '100%' }}>
           <label style={{
             fontFamily: "'Inter', sans-serif",
             fontSize: '13px',
             color: '#4A4A4A',
-            marginBottom: '6px',
+            marginBottom: '4px',
             display: 'block',
           }}>
             Correo Electrónico
@@ -178,10 +181,9 @@ const LoginPage = () => {
             backgroundColor: '#ffffff',
             border: `1px solid ${emailError ? '#ff4444' : '#ccc'}`,
             borderRadius: '8px',
-            padding: '10px 14px',
+            padding: '8px 14px',
             gap: '8px',
           }}>
-            {/* Icono email SVG */}
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
               <rect x="2" y="4" width="20" height="16" rx="2" stroke="#888" strokeWidth="1.8"/>
               <path d="M2 8l10 6 10-6" stroke="#888" strokeWidth="1.8" strokeLinecap="round"/>
@@ -202,24 +204,19 @@ const LoginPage = () => {
             />
           </div>
           {emailError && (
-            <p style={{
-              color: '#cc0000',
-              fontSize: '12px',
-              fontFamily: "'Inter', sans-serif",
-              margin: '4px 0 0 4px',
-            }}>
+            <p style={{ color: '#cc0000', fontSize: '12px', fontFamily: "'Inter', sans-serif", margin: '4px 0 0 4px' }}>
               {emailError}
             </p>
           )}
         </div>
 
-        {/* Campo contraseña */}
+        {/* Línea 196 — Campo contraseña */}
         <div style={{ width: '100%' }}>
           <label style={{
             fontFamily: "'Inter', sans-serif",
             fontSize: '13px',
             color: '#4A4A4A',
-            marginBottom: '6px',
+            marginBottom: '4px',
             display: 'block',
           }}>
             Contraseña
@@ -230,10 +227,9 @@ const LoginPage = () => {
             backgroundColor: '#ffffff',
             border: `1px solid ${passwordError ? '#ff4444' : '#ccc'}`,
             borderRadius: '8px',
-            padding: '10px 14px',
+            padding: '8px 14px',
             gap: '8px',
           }}>
-            {/* Icono candado SVG */}
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
               <rect x="5" y="11" width="14" height="10" rx="2" stroke="#888" strokeWidth="1.8"/>
               <path d="M8 11V7a4 4 0 018 0v4" stroke="#888" strokeWidth="1.8" strokeLinecap="round"/>
@@ -252,11 +248,7 @@ const LoginPage = () => {
                 backgroundColor: 'transparent',
               }}
             />
-            {/* Ojo SVG sin emoji */}
-            <div
-              onClick={() => setShowPassword(!showPassword)}
-              style={{ cursor: 'pointer' }}
-            >
+            <div onClick={() => setShowPassword(!showPassword)} style={{ cursor: 'pointer' }}>
               {showPassword ? (
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                   <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94" stroke="#888" strokeWidth="1.8" strokeLinecap="round"/>
@@ -272,24 +264,19 @@ const LoginPage = () => {
             </div>
           </div>
           {passwordError && (
-            <p style={{
-              color: '#cc0000',
-              fontSize: '12px',
-              fontFamily: "'Inter', sans-serif",
-              margin: '4px 0 0 4px',
-            }}>
+            <p style={{ color: '#cc0000', fontSize: '12px', fontFamily: "'Inter', sans-serif", margin: '4px 0 0 4px' }}>
               {passwordError}
             </p>
           )}
         </div>
 
-        {/* Google */}
+        {/* Línea 248 — Google */}
         <div style={{ width: '100%' }}>
           <p style={{
             fontFamily: "'Inter', sans-serif",
             fontSize: '12px',
             color: '#4A4A4A',
-            marginBottom: '8px',
+            marginBottom: '6px',
             textAlign: 'center',
           }}>
             Otros métodos de ingreso
@@ -298,7 +285,7 @@ const LoginPage = () => {
             onClick={() => {}}
             style={{
               width: '100%',
-              padding: '10px',
+              padding: '8px',
               border: '1px solid #ccc',
               borderRadius: '8px',
               backgroundColor: '#ffffff',
@@ -312,50 +299,28 @@ const LoginPage = () => {
               color: '#4A4A4A',
             }}
           >
-            <img
-              src="https://www.google.com/favicon.ico"
-              alt="Google"
-              style={{ width: '18px', height: '18px' }}
-            />
+            <img src="https://www.google.com/favicon.ico" alt="Google" style={{ width: '18px', height: '18px' }} />
             Ingresar con Google
           </button>
         </div>
 
-        {/* Links */}
+        {/* Línea 275 — Links */}
         <div style={{ textAlign: 'center' }}>
-          <p
-            onClick={() => navigate('/register')}
-            style={{
-              fontFamily: "'Inter', sans-serif",
-              fontSize: '13px',
-              color: '#00674F',
-              cursor: 'pointer',
-              margin: '4px 0',
-            }}
-          >
+          <p onClick={() => navigate('/register')} style={{ fontFamily: "'Inter', sans-serif", fontSize: '13px', color: '#00674F', cursor: 'pointer', margin: '2px 0' }}>
             ¿No tienes cuenta? <strong>Regístrate aquí</strong>
           </p>
-          <p
-            onClick={() => navigate('/forgot-password')}
-            style={{
-              fontFamily: "'Inter', sans-serif",
-              fontSize: '13px',
-              color: '#00674F',
-              cursor: 'pointer',
-              margin: '4px 0',
-            }}
-          >
+          <p onClick={() => navigate('/forgot-password')} style={{ fontFamily: "'Inter', sans-serif", fontSize: '13px', color: '#00674F', cursor: 'pointer', margin: '2px 0' }}>
             ¿Olvidaste tu contraseña?
           </p>
         </div>
 
-        {/* Botón */}
+        {/* Línea 285 — Botón */}
         <button
           onClick={handleLogin}
           disabled={loading}
           style={{
             width: '100%',
-            padding: '14px',
+            padding: 'clamp(10px, 1.5vh, 14px)',
             backgroundColor: loading ? '#cca800' : '#FFBF00',
             color: '#000000',
             border: 'none',

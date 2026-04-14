@@ -11,12 +11,13 @@
   --color-blanco: #FFFFFF;
   --color-carbon: #4A4A4A;
   --color-ambar: #FFBF00;
-
   --font-titulo: 'Montserrat', sans-serif;
   --font-texto: 'Inter', sans-serif;
 }
 
-body {
-  font-family: var(--font-texto);
-  overflow: hidden;
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
 }
