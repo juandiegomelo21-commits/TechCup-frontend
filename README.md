@@ -21,6 +21,6 @@ Sistemas para facilitar su planeación y desarrollo.
 
 https://www.figma.com/design/ntuQw9HDK5ni4791nbgedM/Tech?node-id=0-1&t=kr0Eo4dDKfF1WGFL-1
 
-## 🧩 Módulos de la aplicación Web
+## 🧩 Módulos de la aplicación Web.
 
 Link figma: https://www.figma.com/proto/ntuQw9HDK5ni4791nbgedM/Tech?node-id=1399-1482&p=f&t=252gzLxfSq1cz1lB-1&scaling=min-zoom&content-scaling=fixed&page-id=0%3A1&starting-point-node-id=1399%3A1482
