@@ -7,6 +7,11 @@ interface SidebarItem {
   icon: React.ReactNode;
 }
 
+interface SidebarProps {
+  onClose?: () => void;
+  isMobile?: boolean;
+}
+
 const PanelIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
     <rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="1.8"/>
@@ -72,23 +77,34 @@ const CerrarIcon = () => (
   </svg>
 );
 
+const CloseDrawerIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+    <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+  </svg>
+);
+
 const mainItems: SidebarItem[] = [
   { label: 'Panel Principal', path: '/dashboard', icon: <PanelIcon /> },
-  { label: 'Mi Equipo', path: '/equipo', icon: <EquipoIcon /> },
-  { label: 'Torneo', path: '/torneo', icon: <TorneoIcon /> },
-  { label: 'Pagos', path: '/pagos', icon: <PagosIcon /> },
-  { label: 'Historial', path: '/historial', icon: <HistorialIcon /> },
+  { label: 'Mi Equipo',       path: '/equipo',    icon: <EquipoIcon /> },
+  { label: 'Torneo',          path: '/torneo',    icon: <TorneoIcon /> },
+  { label: 'Pagos',           path: '/pagos',     icon: <PagosIcon /> },
+  { label: 'Historial',       path: '/historial', icon: <HistorialIcon /> },
 ];
 
 const bottomItems: SidebarItem[] = [
-  { label: 'Preguntas Frecuentes', path: '/faq', icon: <FaqIcon /> },
-  { label: 'Aprender', path: '/aprender', icon: <AprenderIcon /> },
-  { label: 'Cerrar Sesión', path: '/', icon: <CerrarIcon /> },
+  { label: 'Preguntas Frecuentes', path: '/faq',     icon: <FaqIcon /> },
+  { label: 'Aprender',             path: '/aprender', icon: <AprenderIcon /> },
+  { label: 'Cerrar Sesión',        path: '/',         icon: <CerrarIcon /> },
 ];
 
-const Sidebar = () => {
+const Sidebar = ({ onClose, isMobile }: SidebarProps) => {
   const navigate = useNavigate();
   const location = useLocation();
+
+  const handleNav = (path: string) => {
+    navigate(path);
+    if (isMobile && onClose) onClose();
+  };
 
   const itemStyle = (path: string): React.CSSProperties => ({
     display: 'flex',
@@ -116,16 +132,34 @@ const Sidebar = () => {
       backgroundColor: 'rgba(0,0,0,0.2)',
       borderRadius: '12px',
     }}>
+      {/* Botón cerrar drawer — solo mobile */}
+      {isMobile && (
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '4px' }}>
+          <div
+            onClick={onClose}
+            style={{
+              color: '#fff',
+              cursor: 'pointer',
+              padding: '4px',
+              borderRadius: '6px',
+              display: 'flex',
+              alignItems: 'center',
+            }}
+          >
+            <CloseDrawerIcon />
+          </div>
+        </div>
+      )}
 
       <img
         src={logo}
         alt="TechUp"
-        style={{ width: '110px', alignSelf: 'center', marginBottom: '24px', marginTop: '8px' }}
+        style={{ width: '110px', alignSelf: 'center', marginBottom: '24px', marginTop: isMobile ? '0' : '8px' }}
       />
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: 1 }}>
         {mainItems.map((item) => (
-          <div key={item.path} style={itemStyle(item.path)} onClick={() => navigate(item.path)}>
+          <div key={item.path} style={itemStyle(item.path)} onClick={() => handleNav(item.path)}>
             <span style={{ color: location.pathname === item.path ? '#FFBF00' : '#ffffff', display: 'flex' }}>
               {item.icon}
             </span>
@@ -136,7 +170,7 @@ const Sidebar = () => {
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', paddingTop: '8px', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
         {bottomItems.map((item) => (
-          <div key={item.path} style={itemStyle(item.path)} onClick={() => navigate(item.path)}>
+          <div key={item.path} style={itemStyle(item.path)} onClick={() => handleNav(item.path)}>
             <span style={{ color: location.pathname === item.path ? '#FFBF00' : '#ffffff', display: 'flex' }}>
               {item.icon}
             </span>
