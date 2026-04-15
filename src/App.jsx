@@ -8,6 +8,7 @@ import EmailSentPage from './Pages/EmailSentPage';
 import ForgotPasswordPage from './Pages/ForgotPasswordPage';
 import PlayerProfilePage from './Pages/PlayerProfilePage';
 import PlayerSearchPage from './Pages/PlayerSearchPage';
+import CreateTournamentPage from './Pages/CreateTournamentPage'
 
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/player-profile" element={<PlayerProfilePage />} />
         <Route path="/player-search" element={<PlayerSearchPage />} />
+        <Route path="/create-tournament" element={<CreateTournamentPage />} />
 
       </Routes>
     </BrowserRouter>

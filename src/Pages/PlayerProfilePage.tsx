@@ -59,11 +59,11 @@ const PlayerProfilePage = () => {
 
         <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '2px', padding: '0 12px' }}>
           {[
-            { label: 'Panel Principal', icon: '▦' },
-            { label: 'Mi Equipo', icon: '👥' },
-            { label: 'Pagos', icon: '💳' },
-            { label: 'Mercado', icon: '🛒' },
-            { label: 'Historial', icon: '📋' },
+            { label: 'Panel Principal' },
+            { label: 'Mis Equipos' },
+            { label: 'Pagos'},
+            { label: 'Mercado'},
+            { label: 'Historial'},
           ].map((item) => (
             <button
               key={item.label}
@@ -82,9 +82,9 @@ const PlayerProfilePage = () => {
 
         <div style={{ padding: '0 12px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
           {[
-            { label: 'Preguntas Frecuentes', icon: '❓' },
-            { label: 'Aprender', icon: '📖' },
-            { label: 'Cerrar Sesión', icon: '🚪' },
+            { label: 'Preguntas Frecuentes'},
+            { label: 'Aprende con nosotros'},
+            { label: 'Cerrar Sesion'},
           ].map((item) => (
             <button
               key={item.label}
@@ -135,14 +135,14 @@ const PlayerProfilePage = () => {
               </div>
             </div>
             <button style={{ display: 'flex', alignItems: 'center', gap: '5px', backgroundColor: 'rgba(255,255,255,0.5)', border: '1px solid rgba(0,0,0,0.15)', borderRadius: '6px', padding: '5px 10px', fontSize: '11px', fontFamily: "'Inter', sans-serif", cursor: 'pointer', color: '#1a1a1a', fontWeight: 500 }}>
-              ✏️ Editar Perfil
+              Editar Perfil
             </button>
           </div>
 
           {/* Cuerpo */}
           <div style={{ padding: '16px 18px' }}>
             <p style={{ margin: '0 0 10px 0', fontFamily: "'Inter', sans-serif", fontSize: '12px', fontWeight: 700, color: '#555' }}>
-              🔒 Información Personal
+              Información Personal
             </p>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', gap: '12px' }}>
@@ -164,7 +164,7 @@ const PlayerProfilePage = () => {
             <div style={{ height: '1px', backgroundColor: '#eee', margin: '0 0 14px 0' }} />
 
             <p style={{ margin: '0 0 10px 0', fontFamily: "'Inter', sans-serif", fontSize: '12px', fontWeight: 700, color: '#555' }}>
-              ⚽ Perfil Deportivo
+               Perfil Deportivo
             </p>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', gap: '12px', alignItems: 'flex-start' }}>
