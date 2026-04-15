@@ -2,9 +2,8 @@ import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../Components/layout/DashboardLayout';
 import balon from '../../assets/balon.png';
 import zapato from '../../assets/zapato.png';
-import tarjetaAmarilla from '../../assets/tajetaAmarilla.png';
+import tarjetaAmarilla from '../../assets/tarjetaAmarilla.png';
 import tarjetaRoja from '../../assets/tarjetaRoja.png';
-
 const mockStandings = [
   { position: 1, team: 'Real Madrid FC', played: 10, won: 8, drawn: 1, lost: 1, gf: 24, gc: 8, gd: 16, points: 25 },
   { position: 2, team: 'Barcelona SC', played: 10, won: 7, drawn: 2, lost: 1, gf: 21, gc: 10, gd: 11, points: 23 },

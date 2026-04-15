@@ -2,13 +2,16 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import WelcomePage from './Pages/WelcomePage';
 import LoginPage from './Pages/LoginPage';
 import RegisterPage from './Pages/RegisterPage';
+import DashboardArbitro from './Pages/DashBoard/DashboardArbitro';
+import DashboardOrganizador from './Pages/DashBoard/DashboardOrganizador';
 import DashboardJugador from './Pages/DashBoard/DashboardJugador';
 import AccountCreatedPage from './Pages/AccountCreatedPage';
 import EmailSentPage from './Pages/EmailSentPage';
 import ForgotPasswordPage from './Pages/ForgotPasswordPage';
 import PlayerProfilePage from './Pages/PlayerProfilePage';
 import PlayerSearchPage from './Pages/PlayerSearchPage';
-import CreateTournamentPage from './Pages/CreateTournamentPage'
+import CreateTournamentPage from './Pages/CreateTournamentPage';
+import MiEquipo from './Pages/MiEquipo';
 
 
 function App() {
@@ -25,6 +28,9 @@ function App() {
         <Route path="/player-profile" element={<PlayerProfilePage />} />
         <Route path="/player-search" element={<PlayerSearchPage />} />
         <Route path="/create-tournament" element={<CreateTournamentPage />} />
+        <Route path="/dashboard/org" element={<DashboardOrganizador />} />
+        <Route path="/dashboard/arbitro" element={<DashboardArbitro />} />
+        <Route path="/equipo" element={<MiEquipo />} />
 
       </Routes>
     </BrowserRouter>
@@ -32,3 +38,4 @@ function App() {
 }
 
 export default App;
+
