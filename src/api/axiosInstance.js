@@ -18,11 +18,11 @@ apiClient.interceptors.request.use((config) => {
      return config;
   });
 
-api.interceptors.response.use(
+apiClient.interceptors.response.use(
    response => response,
    error => {
-   console.error("Error en API:", error.response?data || error.message);
-   return Promise.reject(eror);
+   console.error("Error en API:", error.response?.data || error.message);
+   return Promise.reject(error);
    }
  );
 
