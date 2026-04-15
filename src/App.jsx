@@ -6,7 +6,7 @@ import DashboardArbitro from './Pages/DashBoard/DashboardArbitro';
 import DashboardOrganizador from './Pages/DashBoard/DashboardOrganizador';
 import DashboardJugador from './Pages/DashBoard/DashboardJugador';
 import MiEquipo from './Pages/MiEquipo';
-
+import PizarraTactica from './Pages/PizarraTactica';
 function App() {
   return (
     <BrowserRouter>
@@ -18,6 +18,7 @@ function App() {
         <Route path="/dashboard/org" element={<DashboardOrganizador />} />
         <Route path="/dashboard/arbitro" element={<DashboardArbitro />} />
         <Route path="/equipo" element={<MiEquipo />} />
+        <Route path="/equipo/pizarra" element={<PizarraTactica />} />
       </Routes>
     </BrowserRouter>
   );
