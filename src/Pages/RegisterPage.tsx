@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logo from '../assets/Logo.png';
 import fondoEstadio from '../assets/FondoEstadio.png';
+import { registerPlayerApi } from '../api/playerService';
 
 type Role = 'jugador' | 'arbitro' | 'admin';
 type Affiliation = 'estudiante' | 'graduado' | 'familia';
@@ -26,8 +27,25 @@ const RegisterPage = () => {
   const [license, setLicense] = useState('');
   const [experience, setExperience] = useState('');
   const [token, setToken] = useState('');
+  const [age, setAge] = useState('');
+  const [gender, setGender] = useState('');
+  const [photoBase64, setPhotoBase64] = useState<string | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [apiError, setApiError] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
+
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const result = reader.result as string;
+      setPhotoBase64(result);
+      setPhotoPreview(result);
+    };
+    reader.readAsDataURL(file);
+  };
 
   const inputStyle = {
     width: '100%',
@@ -112,19 +130,26 @@ const RegisterPage = () => {
     return 'tu.correo@institucion.edu';
   };
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     const newErrors: Record<string, string> = {};
     if (!fullName) newErrors.fullName = 'El nombre es requerido.';
     if (!cedula) newErrors.cedula = 'La cédula es requerida.';
     if (!email) newErrors.email = 'El correo es requerido.';
     else if (!email.includes('@')) newErrors.email = 'Correo no válido.';
-    if (role === 'jugador' && affiliation === 'estudiante' && !semester) newErrors.semester = 'El semestre es requerido.';
-    if (role === 'jugador' && affiliation === 'familia') {
-      if (!relativeId) newErrors.relativeId = 'El ID del familiar es requerido.';
-      if (!relationship) newErrors.relationship = 'El parentesco es requerido.';
+    if (role === 'jugador') {
+      if (!age) newErrors.age = 'La edad es requerida.';
+      else if (parseInt(age) < 15 || parseInt(age) > 110) newErrors.age = 'Edad entre 15 y 110.';
+      if (!gender) newErrors.gender = 'El género es requerido.';
+      if (affiliation === 'estudiante' && !semester) newErrors.semester = 'El semestre es requerido.';
+      if (affiliation === 'familia') {
+        if (!relativeId) newErrors.relativeId = 'El ID del familiar es requerido.';
+        if (!relationship) newErrors.relationship = 'El parentesco es requerido.';
+      }
     }
     if (!password) newErrors.password = 'La contraseña es requerida.';
-    else if (password.length < 6) newErrors.password = 'Mínimo 6 caracteres.';
+    else if (password.length < 8) newErrors.password = 'Mínimo 8 caracteres.';
+    else if (!/(?=.*[A-Z])/.test(password)) newErrors.password = 'Debe tener al menos una mayúscula.';
+    else if (!/(?=.*\d)/.test(password)) newErrors.password = 'Debe tener al menos un número.';
     if (!confirmPassword) newErrors.confirmPassword = 'Confirma tu contraseña.';
     else if (password !== confirmPassword) newErrors.confirmPassword = 'No coinciden.';
     if (role === 'arbitro') {
@@ -134,8 +159,43 @@ const RegisterPage = () => {
     if (role === 'admin' && !token) newErrors.token = 'El token es requerido.';
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) return;
+
     setLoading(true);
-    setTimeout(() => { setLoading(false); navigate('/login'); }, 1500);
+    setApiError(null);
+
+    try {
+      if (role === 'jugador') {
+        const playerTypeMap: Record<Affiliation, string> = {
+          estudiante: 'STUDENT',
+          graduado: 'INSTITUTIONAL',
+          familia: 'EXTERNAL',
+        };
+        await registerPlayerApi({
+          fullname: fullName,
+          email,
+          password,
+          numberID: parseInt(cedula),
+          position,
+          dorsalNumber: parseInt(jerseyNumber) || 0,
+          photoUrl: photoBase64 || null,
+          haveTeam: false,
+          age: parseInt(age),
+          gender,
+          captain: false,
+          playerType: playerTypeMap[affiliation],
+          ...(affiliation === 'estudiante' && { semester: parseInt(semester) }),
+          ...(affiliation === 'familia' && {
+            relativeId: parseInt(relativeId),
+            relationship,
+          }),
+        });
+      }
+      navigate('/account-created');
+    } catch (err: any) {
+      setApiError(err.response?.data?.mensaje || 'Error al registrarse. Intenta de nuevo.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -256,6 +316,26 @@ const RegisterPage = () => {
           {errorText('email')}
         </div>
 
+        {role === 'jugador' && (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '8px' }}>
+            <div>
+              <label style={labelStyle}>Edad</label>
+              <input style={{ ...inputStyle, border: `1px solid ${errors.age ? '#ff4444' : '#ccc'}` }} placeholder="Ej: 20" value={age} onChange={(e) => setAge(e.target.value)} type="number" min="15" max="110" />
+              {errorText('age')}
+            </div>
+            <div>
+              <label style={labelStyle}>Género</label>
+              <select value={gender} onChange={(e) => setGender(e.target.value)} style={{ ...inputStyle, border: `1px solid ${errors.gender ? '#ff4444' : '#ccc'}`, color: gender ? '#1a1a1a' : '#888' }}>
+                <option value="">Selecciona género</option>
+                <option value="Masculino">Masculino</option>
+                <option value="Femenino">Femenino</option>
+                <option value="Otro">Otro</option>
+              </select>
+              {errorText('gender')}
+            </div>
+          </div>
+        )}
+
         {/* Semestre — estudiante */}
         {role === 'jugador' && affiliation === 'estudiante' && (
           <div style={{ marginBottom: '8px' }}>
@@ -305,10 +385,10 @@ const RegisterPage = () => {
                   <label style={labelStyle}>Posición Preferida</label>
                   <select value={position} onChange={(e) => setPosition(e.target.value)} style={{ ...inputStyle, color: position ? '#1a1a1a' : '#888' }}>
                     <option value="">Selecciona posición</option>
-                    <option value="portero">Portero</option>
-                    <option value="defensa">Defensa</option>
-                    <option value="mediocampista">Mediocampista</option>
-                    <option value="delantero">Delantero</option>
+                    <option value="GoalKeeper">Portero</option>
+                    <option value="Defender">Defensa</option>
+                    <option value="Midfielder">Mediocampista</option>
+                    <option value="Winger">Extremo</option>
                   </select>
                 </div>
                 <div>
@@ -318,19 +398,26 @@ const RegisterPage = () => {
               </div>
 
               {/* Foto */}
-              <div style={{
+              <label style={{
                 width: '60px', height: '60px', borderRadius: '50%',
                 border: '2px dashed #aaa', display: 'flex', flexDirection: 'column',
                 alignItems: 'center', justifyContent: 'center',
                 cursor: 'pointer', backgroundColor: 'rgba(255,255,255,0.4)',
-                marginTop: '14px',
+                marginTop: '14px', overflow: 'hidden', flexShrink: 0,
               }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                  <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" stroke="#888" strokeWidth="1.8"/>
-                  <circle cx="12" cy="13" r="4" stroke="#888" strokeWidth="1.8"/>
-                </svg>
-                <span style={{ fontSize: '8px', color: '#888', fontFamily: "'Inter', sans-serif", marginTop: '2px' }}>Foto</span>
-              </div>
+                <input type="file" accept="image/*" onChange={handlePhotoChange} style={{ display: 'none' }} />
+                {photoPreview ? (
+                  <img src={photoPreview} alt="Foto" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+                ) : (
+                  <>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                      <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" stroke="#888" strokeWidth="1.8"/>
+                      <circle cx="12" cy="13" r="4" stroke="#888" strokeWidth="1.8"/>
+                    </svg>
+                    <span style={{ fontSize: '8px', color: '#888', fontFamily: "'Inter', sans-serif", marginTop: '2px' }}>Foto</span>
+                  </>
+                )}
+              </label>
             </div>
           </>
         )}
@@ -367,6 +454,13 @@ const RegisterPage = () => {
               {errorText('token')}
             </div>
           </>
+        )}
+
+        {/* Error del backend */}
+        {apiError && (
+          <p style={{ color: '#cc0000', fontSize: '12px', fontFamily: "'Inter', sans-serif", margin: '4px 0', textAlign: 'center' }}>
+            {apiError}
+          </p>
         )}
 
         {/* Botón */}
