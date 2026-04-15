@@ -291,7 +291,7 @@ const LoginPage = () => {
             Otros métodos de ingreso
           </p>
           <button
-            onClick={() => {}}
+            onClick={() => { window.location.href = 'http://localhost:8081/oauth2/authorization/google'; }}
             style={{
               width: '100%',
               padding: '8px',
