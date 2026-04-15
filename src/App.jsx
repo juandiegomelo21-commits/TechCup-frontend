@@ -12,7 +12,7 @@ import PlayerProfilePage from './Pages/PlayerProfilePage';
 import PlayerSearchPage from './Pages/PlayerSearchPage';
 import CreateTournamentPage from './Pages/CreateTournamentPage';
 import MiEquipo from './Pages/MiEquipo';
-
+import PizarraTactica from './Pages/PizarraTactica';
 
 function App() {
   return (
@@ -31,6 +31,8 @@ function App() {
         <Route path="/dashboard/org" element={<DashboardOrganizador />} />
         <Route path="/dashboard/arbitro" element={<DashboardArbitro />} />
         <Route path="/equipo" element={<MiEquipo />} />
+        <Route path="/equipo/pizarra" element={<PizarraTactica />} />
+
 
       </Routes>
     </BrowserRouter>
