@@ -9,6 +9,7 @@ const OAuthCallbackPage = () => {
     const token = params.get('token');
     const email = params.get('email');
     const rol = params.get('rol')?.toLowerCase() ?? '';
+    const userId = params.get('userId') ?? '';
 
     if (!token || !email || !rol) {
       navigate('/login');
@@ -18,16 +19,13 @@ const OAuthCallbackPage = () => {
     localStorage.setItem('token', token);
     localStorage.setItem('email', email);
     localStorage.setItem('rol', rol);
+    localStorage.setItem('userId', userId);
 
     switch (rol) {
-      case 'organizador':
-        navigate('/dashboard/org');
-        break;
-      case 'arbitro':
-        navigate('/dashboard/arbitro');
-        break;
-      default:
-        navigate('/dashboard');
+      case 'organizador': navigate('/dashboard/org'); break;
+      case 'arbitro': navigate('/dashboard/arbitro'); break;
+      case 'capitan': navigate('/dashboard/capitan'); break;
+      default: navigate('/dashboard');
     }
   }, [navigate]);
 

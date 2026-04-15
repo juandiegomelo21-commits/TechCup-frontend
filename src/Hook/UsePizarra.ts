@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { Slot, Jugador } from '../types/equipo.types';
+import type { Slot, Jugador } from '../Types/Equipo.types';
 
 const slotsIniciales: Slot[] = [
   { id: 's1', label: 'PORTERO',        posicion: 'portero', x: 50, y: 88, jugadorId: null },

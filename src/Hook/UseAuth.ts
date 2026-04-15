@@ -9,7 +9,7 @@ const getUserFromStorage = (): User | null => {
   const rol = localStorage.getItem('rol');
   if (!token || !email || !rol) return null;
   return {
-    id: '',
+    id: localStorage.getItem('userId') ?? '',
     name: email,
     email,
     role: rol as User['role'],
@@ -30,8 +30,9 @@ export const useAuth = () => {
       localStorage.setItem('token', response.token);
       localStorage.setItem('email', response.email);
       localStorage.setItem('rol', rol);
+      localStorage.setItem('userId', response.userId ?? '');
       setUser({
-        id: '',
+        id: response.userId ?? '',
         name: response.email,
         email: response.email,
         role: rol as User['role'],
@@ -50,6 +51,7 @@ export const useAuth = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('email');
     localStorage.removeItem('rol');
+    localStorage.removeItem('userId');
     setUser(null);
   };
 

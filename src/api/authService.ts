@@ -10,6 +10,7 @@ export interface LoginResponse {
   email: string;
   rol: string;
   mensaje: string;
+  userId: string;
 }
 
 export const loginApi = async (data: LoginRequest): Promise<LoginResponse> => {
