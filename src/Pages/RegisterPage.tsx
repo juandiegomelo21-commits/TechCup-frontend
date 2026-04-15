@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import logo from '../assets/Logo.png';
 import fondoEstadio from '../assets/FondoEstadio.png';
 import { registerPlayerApi } from '../api/playerService';
+import { registerRefereeApi } from '../api/refereeService';
+import { registerOrganizadorApi } from '../api/organizadorService';
 
-type Role = 'jugador' | 'arbitro' | 'admin';
+type Role = 'jugador' | 'arbitro' | 'organizador';
 type Affiliation = 'estudiante' | 'graduado' | 'familia';
 
 const RegisterPage = () => {
@@ -127,15 +129,18 @@ const RegisterPage = () => {
 
   const emailPlaceholder = () => {
     if (role === 'jugador' && affiliation === 'familia') return 'tu.correo@gmail.com';
-    return 'tu.correo@institucion.edu';
+    if (role === 'jugador') return 'tu.correo@mail.escuelaing.edu.co';
+    return 'tu.correo@gmail.com';
   };
 
   const handleRegister = async () => {
     const newErrors: Record<string, string> = {};
     if (!fullName) newErrors.fullName = 'El nombre es requerido.';
-    if (!cedula) newErrors.cedula = 'La cédula es requerida.';
+    if (role === 'jugador' && !cedula) newErrors.cedula = 'La cédula es requerida.';
     if (!email) newErrors.email = 'El correo es requerido.';
     else if (!email.includes('@')) newErrors.email = 'Correo no válido.';
+    else if (role === 'jugador' && (affiliation === 'estudiante' || affiliation === 'graduado') && !email.endsWith('@mail.escuelaing.edu.co'))
+      newErrors.email = 'Debes usar un correo @mail.escuelaing.edu.co.';
     if (role === 'jugador') {
       if (!age) newErrors.age = 'La edad es requerida.';
       else if (parseInt(age) < 15 || parseInt(age) > 110) newErrors.age = 'Edad entre 15 y 110.';
@@ -156,7 +161,7 @@ const RegisterPage = () => {
       if (!license) newErrors.license = 'La licencia es requerida.';
       if (!experience) newErrors.experience = 'La experiencia es requerida.';
     }
-    if (role === 'admin' && !token) newErrors.token = 'El token es requerido.';
+    if (role === 'organizador' && !token) newErrors.token = 'El token es requerido.';
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) return;
 
@@ -189,10 +194,25 @@ const RegisterPage = () => {
             relationship,
           }),
         });
+      } else if (role === 'arbitro') {
+        await registerRefereeApi({
+          fullname: fullName,
+          email,
+          password,
+          license,
+          experience: parseInt(experience),
+        });
+      } else if (role === 'organizador') {
+        await registerOrganizadorApi({
+          fullname: fullName,
+          email,
+          password,
+          authToken: token,
+        });
       }
       navigate('/account-created');
     } catch (err: any) {
-      setApiError(err.response?.data?.mensaje || 'Error al registrarse. Intenta de nuevo.');
+      setApiError(err.response?.data?.mensaje || err.response?.data?.error || 'Error al registrarse. Intenta de nuevo.');
     } finally {
       setLoading(false);
     }
@@ -263,14 +283,14 @@ const RegisterPage = () => {
         {/* Tabs rol */}
         <p style={{ ...labelStyle, marginBottom: '6px' }}>Selecciona tu Rol</p>
         <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginBottom: '10px' }}>
-          {(['jugador', 'arbitro', 'admin'] as Role[]).map((r) => (
+          {(['jugador', 'arbitro', 'organizador'] as Role[]).map((r) => (
             <button key={r} onClick={() => setRole(r)} style={{
               padding: '7px 18px', borderRadius: '8px', border: 'none', cursor: 'pointer',
               fontFamily: "'Montserrat', sans-serif", fontWeight: 'bold', fontSize: '12px',
               backgroundColor: role === r ? '#FFBF00' : 'rgba(255,255,255,0.7)',
               color: role === r ? '#000' : '#4A4A4A', transition: 'all 0.2s',
             }}>
-              {r === 'jugador' ? 'Jugador' : r === 'arbitro' ? 'Árbitro' : 'Admin'}
+              {r === 'jugador' ? 'Jugador' : r === 'arbitro' ? 'Árbitro' : 'Organizador'}
             </button>
           ))}
         </div>
@@ -297,17 +317,19 @@ const RegisterPage = () => {
         {/* Información Personal */}
         <p style={sectionTitle}>Información Personal</p>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '8px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: role === 'jugador' ? '1fr 1fr' : '1fr', gap: '8px', marginBottom: '8px' }}>
           <div>
             <label style={labelStyle}>Nombre Completo</label>
             <input style={{ ...inputStyle, border: `1px solid ${errors.fullName ? '#ff4444' : '#ccc'}` }} placeholder="Tu nombre completo" value={fullName} onChange={(e) => setFullName(e.target.value)} />
             {errorText('fullName')}
           </div>
-          <div>
-            <label style={labelStyle}>Número de Cédula</label>
-            <input style={{ ...inputStyle, border: `1px solid ${errors.cedula ? '#ff4444' : '#ccc'}` }} placeholder="Tu número de cédula" value={cedula} onChange={(e) => setCedula(e.target.value)} />
-            {errorText('cedula')}
-          </div>
+          {role === 'jugador' && (
+            <div>
+              <label style={labelStyle}>Número de Cédula</label>
+              <input style={{ ...inputStyle, border: `1px solid ${errors.cedula ? '#ff4444' : '#ccc'}` }} placeholder="Tu número de cédula" value={cedula} onChange={(e) => setCedula(e.target.value)} />
+              {errorText('cedula')}
+            </div>
+          )}
         </div>
 
         <div style={{ marginBottom: '8px' }}>
@@ -441,10 +463,10 @@ const RegisterPage = () => {
           </>
         )}
 
-        {/* Admin */}
-        {role === 'admin' && (
+        {/* Organizador */}
+        {role === 'organizador' && (
           <>
-            <p style={sectionTitle}>Acceso Administrador</p>
+            <p style={sectionTitle}>Acceso Organizador</p>
             <div style={{ marginBottom: '8px' }}>
               <label style={labelStyle}>Token de Autorización</label>
               <input style={{ ...inputStyle, border: `1px solid ${errors.token ? '#ff4444' : '#ccc'}` }} placeholder="Ingresa el token seguro" value={token} onChange={(e) => setToken(e.target.value)} />

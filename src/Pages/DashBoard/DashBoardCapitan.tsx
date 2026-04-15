@@ -1,28 +1,17 @@
+import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../Components/layout/DashboardLayout';
 import Badge from '../../Components/ui/Bagde';
-import { Invitation, Player } from '../../Types';
+import { searchPlayersApi, getPlayerByIdApi, type PlayerSearchResult } from '../../api/playerService';
+import { getTeamsApi, type TeamResponse } from '../../api/teamService';
 
-const mockPlayers: Player[] = [
-  { id: '1', name: 'Carlos Mendoza', position: 'Delantero', age: 24 },
-  { id: '2', name: 'Ana Rodríguez', position: 'Defensa', age: 22 },
-  { id: '3', name: 'Luis García', position: 'Mediocampista', age: 26 },
-  { id: '4', name: 'María López', position: 'Portera', age: 23 },
-  { id: '5', name: 'Jorge Martínez', position: 'Delantero', age: 25 },
-  { id: '6', name: 'Sofía Torres', position: 'Mediocampista', age: 21 },
-];
-
-const mockInvitations: Invitation[] = [
-  { name: 'Pedro Sánchez', date: '2026-04-05', status: 'Aceptada' },
-  { name: 'Laura Díaz', date: '2026-04-04', status: 'Pendiente' },
-  { name: 'Miguel Ruiz', date: '2026-04-03', status: 'Aceptada' },
-  { name: 'Carmen Vega', date: '2026-04-02', status: 'Rechazada' },
-  { name: 'Roberto Castro', date: '2026-04-01', status: 'Pendiente' },
-  { name: 'Isabel Moreno', date: '2026-03-31', status: 'Aceptada' },
-];
-
-const currentPlayers = 12;
-const maxPlayers = 20;
+const posicionDisplay: Record<string, string> = {
+  GoalKeeper:   'Portero',
+  Defender:     'Defensa',
+  Midfielder:   'Mediocampista',
+  Winger:       'Extremo',
+  Forward:      'Delantero',
+};
 
 const thStyle: React.CSSProperties = {
   fontFamily: "'Inter', sans-serif",
@@ -43,6 +32,38 @@ const tdStyle: React.CSSProperties = {
 
 const DashboardCapitan = () => {
   const navigate = useNavigate();
+  const [players, setPlayers] = useState<PlayerSearchResult[]>([]);
+  const [myTeam, setMyTeam] = useState<TeamResponse | null>(null);
+  const [loadingPlayers, setLoadingPlayers] = useState(true);
+  const [loadingTeam, setLoadingTeam] = useState(true);
+
+  const loadAvailablePlayers = useCallback(() => {
+    setLoadingPlayers(true);
+    searchPlayersApi({})
+      .then(results => setPlayers(results.filter(p => p.available)))
+      .catch(() => setPlayers([]))
+      .finally(() => setLoadingPlayers(false));
+  }, []);
+
+  useEffect(() => {
+    loadAvailablePlayers();
+  }, [loadAvailablePlayers]);
+
+  useEffect(() => {
+    const userId = localStorage.getItem('userId') ?? '';
+    if (!userId) { setLoadingTeam(false); return; }
+
+    Promise.all([getPlayerByIdApi(userId), getTeamsApi()])
+      .then(([player, teams]) => {
+        const team = teams.find(t => t.captainName === player.fullname);
+        setMyTeam(team ?? null);
+      })
+      .catch(() => {})
+      .finally(() => setLoadingTeam(false));
+  }, []);
+
+  const currentPlayers = myTeam?.players.length ?? 0;
+  const maxPlayers = 20;
 
   return (
     <DashboardLayout>
@@ -70,17 +91,14 @@ const DashboardCapitan = () => {
               fontWeight: 'bold',
               fontSize: '13px',
               color: '#000',
-              display: 'inline-block',
-              borderRadius: '0 0 8px 0',
             }}>
-              Resumen del Equipo
+              {loadingTeam ? 'Cargando equipo...' : myTeam ? `Equipo: ${myTeam.teamName}` : 'Resumen del Equipo'}
             </div>
 
             <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
 
               {/* Jugadores inscritos */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                {/* Icono escudo */}
                 <div style={{
                   width: '48px',
                   height: '48px',
@@ -105,7 +123,6 @@ const DashboardCapitan = () => {
                       {currentPlayers} / {maxPlayers}
                     </span>
                   </div>
-                  {/* Barra progreso */}
                   <div style={{ width: '100%', backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: '4px', height: '6px' }}>
                     <div style={{
                       width: `${(currentPlayers / maxPlayers) * 100}%`,
@@ -152,7 +169,7 @@ const DashboardCapitan = () => {
               flex: 1,
             }}>
               <button
-                onClick={() => navigate('/perfil')}
+                onClick={() => navigate('/player-profile')}
                 style={{
                   backgroundColor: '#FFBF00',
                   border: 'none',
@@ -175,9 +192,9 @@ const DashboardCapitan = () => {
               </div>
             </div>
 
-            {/* Tus Estadísticas */}
+            {/* Mi Equipo */}
             <button
-              onClick={() => navigate('/estadisticas')}
+              onClick={() => navigate('/equipo')}
               style={{
                 backgroundColor: '#FFBF00',
                 border: 'none',
@@ -191,7 +208,7 @@ const DashboardCapitan = () => {
                 cursor: 'pointer',
               }}
             >
-              Tus Estadísticas
+              Mi Equipo
             </button>
           </div>
         </div>
@@ -222,44 +239,50 @@ const DashboardCapitan = () => {
               fontSize: '13px',
               color: '#000',
             }}>
-              Buscar Jugadores Disponibles
+              Jugadores Disponibles
             </div>
 
             <div style={{ overflowY: 'auto', flex: 1 }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.2)', position: 'sticky', top: 0, backgroundColor: 'rgba(0,40,20,0.95)' }}>
-                    <th style={thStyle}>Nombre</th>
-                    <th style={thStyle}>Posición</th>
-                    <th style={{ ...thStyle, textAlign: 'center' }}>Edad</th>
-                    <th style={{ ...thStyle, textAlign: 'center' }}>Acción</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {mockPlayers.map((p) => (
-                    <tr key={p.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-                      <td style={tdStyle}>{p.name}</td>
-                      <td style={tdStyle}>{p.position}</td>
-                      <td style={{ ...tdStyle, textAlign: 'center' }}>{p.age}</td>
-                      <td style={{ ...tdStyle, textAlign: 'center' }}>
-                        <button style={{
-                          backgroundColor: '#FFBF00',
-                          border: 'none',
-                          borderRadius: '6px',
-                          padding: '4px 12px',
-                          fontFamily: "'Montserrat', sans-serif",
-                          fontWeight: 'bold',
-                          fontSize: '11px',
-                          color: '#000',
-                          cursor: 'pointer',
-                        }}>
-                          Invitar
-                        </button>
-                      </td>
+              {loadingPlayers ? (
+                <p style={{ color: 'rgba(255,255,255,0.5)', textAlign: 'center', padding: '20px', fontFamily: "'Inter', sans-serif", fontSize: '13px' }}>Cargando jugadores...</p>
+              ) : players.length === 0 ? (
+                <p style={{ color: 'rgba(255,255,255,0.5)', textAlign: 'center', padding: '20px', fontFamily: "'Inter', sans-serif", fontSize: '13px' }}>No hay jugadores disponibles.</p>
+              ) : (
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.2)', position: 'sticky', top: 0, backgroundColor: 'rgba(0,40,20,0.95)' }}>
+                      <th style={thStyle}>Nombre</th>
+                      <th style={thStyle}>Posición</th>
+                      <th style={{ ...thStyle, textAlign: 'center' }}>Edad</th>
+                      <th style={{ ...thStyle, textAlign: 'center' }}>Acción</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {players.map((p) => (
+                      <tr key={p.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+                        <td style={tdStyle}>{p.fullname}</td>
+                        <td style={tdStyle}>{posicionDisplay[p.position] ?? p.position}</td>
+                        <td style={{ ...tdStyle, textAlign: 'center' }}>{p.age}</td>
+                        <td style={{ ...tdStyle, textAlign: 'center' }}>
+                          <button style={{
+                            backgroundColor: '#FFBF00',
+                            border: 'none',
+                            borderRadius: '6px',
+                            padding: '4px 12px',
+                            fontFamily: "'Montserrat', sans-serif",
+                            fontWeight: 'bold',
+                            fontSize: '11px',
+                            color: '#000',
+                            cursor: 'pointer',
+                          }}>
+                            Invitar
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </div>
           </div>
 
@@ -283,28 +306,9 @@ const DashboardCapitan = () => {
             </div>
 
             <div style={{ overflowY: 'auto', flex: 1, padding: '8px' }}>
-              {mockInvitations.map((inv, i) => (
-                <div
-                  key={i}
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    padding: '8px 10px',
-                    borderBottom: '1px solid rgba(255,255,255,0.08)',
-                  }}
-                >
-                  <div>
-                    <p style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 'bold', fontSize: '13px', color: '#fff', margin: 0 }}>
-                      {inv.name}
-                    </p>
-                    <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '11px', color: 'rgba(255,255,255,0.4)', margin: '2px 0 0 0' }}>
-                      {inv.date}
-                    </p>
-                  </div>
-                  <Badge status={inv.status} />
-                </div>
-              ))}
+              <p style={{ color: 'rgba(255,255,255,0.5)', textAlign: 'center', padding: '20px', fontFamily: "'Inter', sans-serif", fontSize: '13px' }}>
+                No hay invitaciones enviadas aún.
+              </p>
             </div>
           </div>
 

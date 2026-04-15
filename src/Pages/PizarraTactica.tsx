@@ -1,41 +1,16 @@
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../Components/layout/DashboardLayout';
 import { usePizarra } from '../Hook/UsePizarra';
+import { getPlayerByIdApi } from '../api/playerService';
+import { getTeamsApi } from '../api/teamService';
+import type { Jugador } from '../Types/Equipo.types';
 
-import jeimmy   from '../assets/Jeimmy.png';
-import juandi   from '../assets/juandi.png';
-import santi    from '../assets/santi.png';
-import jesteban from '../assets/jesteban.png';
-import david    from '../assets/david.png';
-import cantor   from '../assets/cantor.png';
-import rodrigo  from '../assets/rodrigo.png';
-import messi    from '../assets/messi.png';
-
-// ── Tipos ─────────────────────────────────────────────────────────────────────
-
-type Posicion = 'portero' | 'defensa' | 'mediocampista' | 'delantero';
-
-export interface Jugador {
-  id: string;
-  nombre: string;
-  foto: string;
-  posicion: Posicion;
-}
-
-// ── Mock data — reemplazar con fetch al back ──────────────────────────────────
-
-const jugadores: Jugador[] = [
-  { id: '1', nombre: 'JEIMMY',    foto: jeimmy,   posicion: 'portero'       },
-  { id: '2', nombre: 'JUAN DI',   foto: juandi,   posicion: 'defensa'       },
-  { id: '3', nombre: 'SANTI',     foto: santi,    posicion: 'defensa'       },
-  { id: '4', nombre: 'J ESTEBAN', foto: jesteban, posicion: 'defensa'       },
-  { id: '5', nombre: 'DAVID',     foto: david,    posicion: 'mediocampista' },
-  { id: '6', nombre: 'CANTOR',    foto: cantor,   posicion: 'mediocampista' },
-  { id: '7', nombre: 'RODRIGO',   foto: rodrigo,  posicion: 'delantero'     },
-  { id: '8', nombre: 'TU',        foto: messi,    posicion: 'delantero'     },
-];
+const COLORS = ['#e74c3c','#27ae60','#e67e22','#8e44ad','#2980b9','#16a085','#c0392b','#1abc9c'];
 
 // ── Colores y labels por posición ─────────────────────────────────────────────
+
+type Posicion = 'portero' | 'defensa' | 'mediocampista' | 'delantero';
 
 const colPosicion: Record<Posicion, string> = {
   portero:       '#E8A020',
@@ -51,12 +26,41 @@ const labelPosicion: Record<Posicion, string> = {
   delantero:     'Delantero',
 };
 
+const backendPosToSlot: Record<string, Posicion> = {
+  GoalKeeper:   'portero',
+  Defender:     'defensa',
+  Midfielder:   'mediocampista',
+  Winger:       'mediocampista',
+  Forward:      'delantero',
+};
+
 const colorSlot = { portero: '#E8A020', jugador: '#1565C0' };
+
+// ── Avatar circular con iniciales ─────────────────────────────────────────────
+
+const AvatarCircle = ({ nombre, size = 48, colorIdx = 0, esPortero = false }: { nombre: string; size?: number; colorIdx?: number; esPortero?: boolean }) => {
+  const initials = nombre.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+  const bg = esPortero ? '#E8A020' : COLORS[colorIdx % COLORS.length];
+  return (
+    <div style={{
+      width: `${size}px`, height: `${size}px`, borderRadius: '50%',
+      backgroundColor: bg,
+      border: `2.5px solid ${esPortero ? '#E8A020' : '#ffffff'}`,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      fontFamily: "'Montserrat', sans-serif", fontWeight: 800,
+      fontSize: `${size * 0.28}px`, color: '#fff',
+      boxShadow: esPortero ? '0 0 10px #E8A02066' : '0 0 8px rgba(255,255,255,0.15)',
+      flexShrink: 0,
+    }}>
+      {initials}
+    </div>
+  );
+};
 
 // ── Tarjeta jugador draggable ─────────────────────────────────────────────────
 
-const TarjetaJugador = ({ jugador, asignado }: { jugador: Jugador; asignado: boolean }) => {
-  const col = colPosicion[jugador.posicion];
+const TarjetaJugador = ({ jugador, asignado, colorIdx }: { jugador: Jugador; asignado: boolean; colorIdx: number }) => {
+  const col = colPosicion[jugador.posicion as Posicion] ?? '#0D3B6E';
   const esPortero = jugador.posicion === 'portero';
 
   return (
@@ -74,33 +78,16 @@ const TarjetaJugador = ({ jugador, asignado }: { jugador: Jugador; asignado: boo
         pointerEvents: asignado ? 'none' : 'auto',
       }}
     >
-      {/* Círculo foto */}
-      <div style={{
-        width: '52px', height: '52px', borderRadius: '50%',
-        overflow: 'hidden',
-        border: `2.5px solid ${esPortero ? '#E8A020' : '#ffffff'}`,
-        backgroundColor: col,
-        boxShadow: esPortero
-          ? `0 0 10px #E8A02066`
-          : '0 0 8px rgba(255,255,255,0.15)',
-        position: 'relative', flexShrink: 0,
-      }}>
-        <img src={jugador.foto} alt={jugador.nombre} style={{
-          width: '100%', height: '130%', objectFit: 'cover',
-          objectPosition: 'top', position: 'absolute', top: 0, left: 0,
-        }} />
-      </div>
+      <AvatarCircle nombre={jugador.nombre} size={52} colorIdx={colorIdx} esPortero={esPortero} />
 
-      {/* Nombre */}
       <span style={{
         fontSize: '8px', fontWeight: 800, color: '#fff',
         fontFamily: "'Montserrat', sans-serif",
         letterSpacing: '0.3px', textAlign: 'center', lineHeight: 1.1,
       }}>
-        {jugador.nombre}
+        {jugador.nombre.split(' ')[0].toUpperCase()}
       </span>
 
-      {/* Badge posición */}
       <span style={{
         backgroundColor: col,
         color: esPortero ? '#000' : '#fff',
@@ -110,7 +97,7 @@ const TarjetaJugador = ({ jugador, asignado }: { jugador: Jugador; asignado: boo
         padding: '1px 5px', borderRadius: '4px',
         border: esPortero ? 'none' : '1px solid rgba(255,255,255,0.3)',
       }}>
-        {labelPosicion[jugador.posicion]}
+        {labelPosicion[jugador.posicion as Posicion] ?? jugador.posicion}
       </span>
     </div>
   );
@@ -120,6 +107,32 @@ const TarjetaJugador = ({ jugador, asignado }: { jugador: Jugador; asignado: boo
 
 const PizarraTactica = () => {
   const navigate = useNavigate();
+  const [jugadores, setJugadores] = useState<Jugador[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const userId = localStorage.getItem('userId') ?? '';
+    if (!userId) { setLoading(false); return; }
+
+    Promise.all([getPlayerByIdApi(userId), getTeamsApi()])
+      .then(([player, teams]) => {
+        const team = teams.find(t => t.captainName === player.fullname) ?? null;
+        if (!team) { setLoading(false); return; }
+
+        // team.players es string[] (nombres o IDs)
+        // Mapear a Jugador[] con posición basada en el nombre del capitán = portero ficticio
+        const jList: Jugador[] = team.players.map((nombre, i) => ({
+          id: String(i + 1),
+          nombre,
+          foto: '',
+          posicion: i === 0 ? 'portero' : (i <= 2 ? 'defensa' : i <= 4 ? 'mediocampista' : 'delantero'),
+        }));
+        setJugadores(jList);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
   const {
     slots, dragOver, setDragOver,
     hayCambios, mostrarPopup,
@@ -175,14 +188,14 @@ const PizarraTactica = () => {
             Pizarra Táctica — Fútbol 7
           </span>
           <button
-            onClick={() => navigate('/mercado')}
+            onClick={() => navigate('/player-search')}
             style={{
               backgroundColor: '#FFBF00', color: '#000', border: 'none',
               borderRadius: '25px', padding: '10px 28px', fontSize: '13px',
               fontWeight: 800, cursor: 'pointer', fontFamily: "'Montserrat', sans-serif",
             }}
           >
-            Mercado de jugadores
+            Buscar jugadores
           </button>
         </div>
 
@@ -225,7 +238,7 @@ const PizarraTactica = () => {
               {/* Slots */}
               {slots.map(slot => {
                 const jugador = slot.jugadorId ? jugadores.find(j => j.id === slot.jugadorId) : null;
-                const col = colorSlot[slot.posicion];
+                const col = colorSlot[slot.posicion as keyof typeof colorSlot] ?? '#1565C0';
                 const isOver = dragOver === slot.id;
 
                 return (
@@ -251,20 +264,13 @@ const PizarraTactica = () => {
                         <div
                           onClick={() => handleRemove(slot.id)}
                           title="Click para devolver"
-                          style={{
-                            width: '48px', height: '48px', borderRadius: '50%',
-                            overflow: 'hidden',
-                            border: `2.5px solid ${jugador.posicion === 'portero' ? '#E8A020' : '#fff'}`,
-                            backgroundColor: colPosicion[jugador.posicion],
-                            boxShadow: jugador.posicion === 'portero'
-                              ? '0 0 16px #E8A020bb'
-                              : '0 0 12px rgba(255,255,255,0.25)',
-                            cursor: 'pointer',
-                          }}
                         >
-                          <img src={jugador.foto} alt={jugador.nombre} style={{
-                            width: '100%', height: '130%', objectFit: 'cover', objectPosition: 'top',
-                          }} />
+                          <AvatarCircle
+                            nombre={jugador.nombre}
+                            size={48}
+                            colorIdx={jugadores.indexOf(jugador)}
+                            esPortero={jugador.posicion === 'portero'}
+                          />
                         </div>
                         <span style={{
                           position: 'absolute', bottom: '-16px', left: '50%',
@@ -274,7 +280,7 @@ const PizarraTactica = () => {
                           textShadow: '0 1px 4px rgba(0,0,0,1)',
                           whiteSpace: 'nowrap',
                         }}>
-                          {jugador.nombre}
+                          {jugador.nombre.split(' ')[0].toUpperCase()}
                         </span>
                       </div>
                     ) : (
@@ -330,7 +336,7 @@ const PizarraTactica = () => {
             style={{ width: '175px', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}
           >
             <span style={{ color: '#FFBF00', fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontSize: '13px' }}>
-              Jugadores ({jugadores.length}/12)
+              {loading ? 'Cargando...' : `Jugadores (${jugadores.length}/12)`}
             </span>
 
             <div style={{
@@ -338,13 +344,19 @@ const PizarraTactica = () => {
               gap: '10px', overflowY: 'auto', flex: 1,
               alignContent: 'start', paddingRight: '2px',
             }}>
-              {jugadores.map(j => (
+              {jugadores.map((j, i) => (
                 <TarjetaJugador
                   key={j.id}
                   jugador={j}
                   asignado={jugadoresAsignados.includes(j.id)}
+                  colorIdx={i}
                 />
               ))}
+              {!loading && jugadores.length === 0 && (
+                <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '11px', fontFamily: "'Inter', sans-serif", gridColumn: '1/-1', textAlign: 'center', marginTop: '20px' }}>
+                  No hay jugadores en tu equipo.
+                </p>
+              )}
             </div>
 
             {/* Leyenda */}
