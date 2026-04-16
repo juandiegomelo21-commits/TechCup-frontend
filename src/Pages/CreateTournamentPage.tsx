@@ -75,7 +75,9 @@ const CreateTournamentPage = () => {
   };
 
   const handleConfirmar = async () => {
-    if (!nombre) { setError('El nombre del torneo es obligatorio.'); return; }
+    if (!nombre.trim()) { setError('El nombre del torneo es obligatorio.'); return; }
+    if (nombre.trim().length < 5) { setError('El nombre debe tener al menos 5 caracteres.'); return; }
+    if (nombre.trim().length > 100) { setError('El nombre no puede superar los 100 caracteres.'); return; }
     if (!startDate) { setError('La fecha de inicio es obligatoria.'); return; }
     if (!endDate) { setError('La fecha de fin es obligatoria.'); return; }
     if (!cuotaInscripcion) { setError('La cuota de inscripción es obligatoria.'); return; }

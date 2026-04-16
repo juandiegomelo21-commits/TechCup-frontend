@@ -34,3 +34,18 @@ export const createTournamentApi = async (data: CreateTournamentRequest): Promis
   const response = await apiClient.post<TournamentResponse>('/api/tournaments', data);
   return response.data;
 };
+
+export const activateTournamentApi = async (id: string): Promise<TournamentResponse> => {
+  const response = await apiClient.put<TournamentResponse>(`/api/tournaments/${id}/start`);
+  return response.data;
+};
+
+export const startProgressTournamentApi = async (id: string): Promise<TournamentResponse> => {
+  const response = await apiClient.put<TournamentResponse>(`/api/tournaments/${id}/progress`);
+  return response.data;
+};
+
+export const finishTournamentApi = async (id: string): Promise<TournamentResponse> => {
+  const response = await apiClient.put<TournamentResponse>(`/api/tournaments/${id}/finish`);
+  return response.data;
+};
