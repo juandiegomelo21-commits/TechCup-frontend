@@ -1,16 +1,18 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../Components/layout/DashboardLayout';
 import balon from '../../assets/balon.png';
 import zapato from '../../assets/zapato.png';
 import tarjetaAmarilla from '../../assets/tarjetaAmarilla.png';
 import tarjetaRoja from '../../assets/tarjetaRoja.png';
+
 const mockStandings = [
-  { position: 1, team: 'Real Madrid FC', played: 10, won: 8, drawn: 1, lost: 1, gf: 24, gc: 8, gd: 16, points: 25 },
-  { position: 2, team: 'Barcelona SC', played: 10, won: 7, drawn: 2, lost: 1, gf: 21, gc: 10, gd: 11, points: 23 },
-  { position: 3, team: 'Atlético United', played: 10, won: 6, drawn: 3, lost: 1, gf: 18, gc: 9, gd: 9, points: 21 },
-  { position: 4, team: 'Deportivo FC', played: 10, won: 5, drawn: 3, lost: 2, gf: 15, gc: 12, gd: 3, points: 18 },
-  { position: 5, team: 'Juventus FC', played: 10, won: 4, drawn: 2, lost: 4, gf: 12, gc: 14, gd: -2, points: 14 },
-  { position: 6, team: 'Milan AC', played: 10, won: 3, drawn: 3, lost: 4, gf: 10, gc: 16, gd: -6, points: 12 },
+  { position: 1, team: 'Real Madrid FC',  played: 10, won: 8, drawn: 1, lost: 1, gf: 24, gc: 8,  gd: 16,  points: 25 },
+  { position: 2, team: 'Barcelona SC',    played: 10, won: 7, drawn: 2, lost: 1, gf: 21, gc: 10, gd: 11,  points: 23 },
+  { position: 3, team: 'Atlético United', played: 10, won: 6, drawn: 3, lost: 1, gf: 18, gc: 9,  gd: 9,   points: 21 },
+  { position: 4, team: 'Deportivo FC',    played: 10, won: 5, drawn: 3, lost: 2, gf: 15, gc: 12, gd: 3,   points: 18 },
+  { position: 5, team: 'Juventus FC',     played: 10, won: 4, drawn: 2, lost: 4, gf: 12, gc: 14, gd: -2,  points: 14 },
+  { position: 6, team: 'Milan AC',        played: 10, won: 3, drawn: 3, lost: 4, gf: 10, gc: 16, gd: -6,  points: 12 },
 ];
 
 const mockStats = {
@@ -74,43 +76,16 @@ const StatCard = ({ label, value, icon, max, iconSize = 48 }: StatCardProps) => 
     }}>
       {label}
     </span>
-    <img
-      src={icon}
-      alt={label}
-      style={{
-        width: `${iconSize}px`,
-        height: `${iconSize}px`,
-        objectFit: 'contain',
-      }}
-    />
-    <span style={{
-      fontFamily: "'Montserrat', sans-serif",
-      fontWeight: 'bold',
-      fontSize: '26px',
-      color: '#fff',
-    }}>
+    <img src={icon} alt={label} style={{ width: `${iconSize}px`, height: `${iconSize}px`, objectFit: 'contain' }} />
+    <span style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 'bold', fontSize: '26px', color: '#fff' }}>
       {value}
     </span>
     {max !== undefined && (
       <>
-        <div style={{
-          width: '100%',
-          backgroundColor: 'rgba(255,255,255,0.2)',
-          borderRadius: '4px',
-          height: '4px',
-        }}>
-          <div style={{
-            width: `${(value / max) * 100}%`,
-            backgroundColor: '#FFBF00',
-            borderRadius: '4px',
-            height: '4px',
-          }} />
+        <div style={{ width: '100%', backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: '4px', height: '4px' }}>
+          <div style={{ width: `${(value / max) * 100}%`, backgroundColor: '#FFBF00', borderRadius: '4px', height: '4px' }} />
         </div>
-        <span style={{
-          fontFamily: "'Inter', sans-serif",
-          fontSize: '10px',
-          color: 'rgba(255,255,255,0.5)',
-        }}>
+        <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '10px', color: 'rgba(255,255,255,0.5)' }}>
           {value}/{max}
         </span>
       </>
@@ -118,127 +93,222 @@ const StatCard = ({ label, value, icon, max, iconSize = 48 }: StatCardProps) => 
   </div>
 );
 
+// ── Modal confirmación capitán ────────────────────────────────────────────────
+
+interface ModalCapitanProps {
+  onConfirmar: () => void;
+  onCancelar: () => void;
+}
+
+const ModalCapitan = ({ onConfirmar, onCancelar }: ModalCapitanProps) => (
+  <>
+    {/* Overlay */}
+    <div
+      onClick={onCancelar}
+      style={{
+        position: 'fixed', inset: 0,
+        backgroundColor: 'rgba(0,0,0,0.6)',
+        backdropFilter: 'blur(4px)',
+        zIndex: 998,
+      }}
+    />
+
+    {/* Modal */}
+    <div style={{
+      position: 'fixed',
+      top: '50%', left: '50%',
+      transform: 'translate(-50%, -50%)',
+      zIndex: 999,
+      backgroundColor: 'rgba(0,50,28,0.97)',
+      backdropFilter: 'blur(16px)',
+      border: '1px solid rgba(255,191,0,0.4)',
+      borderRadius: '20px',
+      padding: '32px 36px',
+      width: '340px',
+      boxShadow: '0 24px 60px rgba(0,0,0,0.5)',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      gap: '16px',
+      animation: 'fadeIn 0.2s ease',
+    }}>
+      <style>{`@keyframes fadeIn { from { opacity:0; transform:translate(-50%,-48%); } to { opacity:1; transform:translate(-50%,-50%); } }`}</style>
+
+      {/* Icono */}
+      <div style={{
+        width: '60px', height: '60px', borderRadius: '50%',
+        backgroundColor: 'rgba(255,191,0,0.15)',
+        border: '2px solid rgba(255,191,0,0.5)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2L3 7l9 5 9-5-9-5z" stroke="#FFBF00" strokeWidth="2" strokeLinejoin="round"/>
+          <path d="M3 12l9 5 9-5" stroke="#FFBF00" strokeWidth="2" strokeLinejoin="round"/>
+          <path d="M3 17l9 5 9-5" stroke="#FFBF00" strokeWidth="2" strokeLinejoin="round"/>
+        </svg>
+      </div>
+
+      {/* Título */}
+      <div style={{ textAlign: 'center' }}>
+        <p style={{
+          margin: '0 0 6px',
+          fontFamily: "'Montserrat', sans-serif",
+          fontWeight: 800, fontSize: '17px', color: '#fff',
+        }}>
+          ¿Estás seguro?
+        </p>
+        <p style={{
+          margin: 0,
+          fontFamily: "'Inter', sans-serif",
+          fontSize: '12px', color: 'rgba(255,255,255,0.6)',
+          lineHeight: 1.5,
+        }}>
+          Al convertirte en capitán tendrás la responsabilidad de gestionar el equipo y tomar decisiones en el torneo.
+        </p>
+      </div>
+
+      {/* Botones */}
+      <div style={{ display: 'flex', gap: '12px', width: '100%' }}>
+        <button
+          onClick={onCancelar}
+          style={{
+            flex: 1, padding: '11px 0',
+            border: '1px solid rgba(255,255,255,0.2)',
+            borderRadius: '25px', fontSize: '13px',
+            cursor: 'pointer',
+            fontFamily: "'Montserrat', sans-serif",
+            fontWeight: 700,
+            background: 'rgba(255,255,255,0.08)',
+            color: 'rgba(255,255,255,0.7)',
+            transition: 'all 0.2s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.14)'; }}
+          onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.08)'; }}
+        >
+          No, volver
+        </button>
+        <button
+          onClick={onConfirmar}
+          style={{
+            flex: 1, padding: '11px 0',
+            border: 'none', borderRadius: '25px',
+            fontSize: '13px', cursor: 'pointer',
+            fontFamily: "'Montserrat', sans-serif",
+            fontWeight: 800,
+            background: '#FFBF00',
+            color: '#000',
+            boxShadow: '0 4px 14px rgba(255,191,0,0.35)',
+            transition: 'all 0.2s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#e6ac00'; }}
+          onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#FFBF00'; }}
+        >
+          Sí, ser capitán
+        </button>
+      </div>
+    </div>
+  </>
+);
+
+// ── Pantalla ──────────────────────────────────────────────────────────────────
+
 const DashboardJugador = () => {
   const navigate = useNavigate();
+  const [mostrarModal, setMostrarModal] = useState(false);
+
+  const handleConfirmarCapitan = () => {
+    setMostrarModal(false);
+    navigate('/dashboard/capitan');
+  };
 
   return (
     <DashboardLayout>
-      <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '10px',
-        height: '100%',
-        overflow: 'hidden',
-      }}>
+      {/* Modal */}
+      {mostrarModal && (
+        <ModalCapitan
+          onConfirmar={handleConfirmarCapitan}
+          onCancelar={() => setMostrarModal(false)}
+        />
+      )}
 
-        {/* Fila superior */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', height: '100%', overflow: 'hidden' }}>
+
+        {/* ── Fila superior ─────────────────────────────────────────────── */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '10px' }}>
 
           {/* Estadísticas */}
-          <div style={{
-            backgroundColor: 'rgba(0,0,0,0.25)',
-            borderRadius: '12px',
-            overflow: 'hidden',
-          }}>
+          <div style={{ backgroundColor: 'rgba(0,0,0,0.25)', borderRadius: '12px', overflow: 'hidden' }}>
             <div style={{
-              backgroundColor: '#FFBF00',
-              padding: '8px 16px',
-              fontFamily: "'Montserrat', sans-serif",
-              fontWeight: 'bold',
-              fontSize: '13px',
-              color: '#000',
+              backgroundColor: '#FFBF00', padding: '8px 16px',
+              fontFamily: "'Montserrat', sans-serif", fontWeight: 'bold', fontSize: '13px', color: '#000',
             }}>
               Estadísticas del Jugador — Torneo Actual
             </div>
-
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(4, 1fr)',
-              gap: '8px',
-              padding: '10px',
-            }}>
-              <StatCard
-                label="Goles Anotados"
-                value={mockStats.goals}
-                icon={balon}
-                max={mockStats.maxGoals}
-                iconSize={44}
-              />
-              <StatCard
-                label="Partidos Jugados"
-                value={mockStats.matches}
-                icon={zapato}
-                max={mockStats.maxMatches}
-                iconSize={50}
-              />
-              <StatCard
-                label="Tarjetas Amarillas"
-                value={mockStats.yellowCards}
-                icon={tarjetaAmarilla}
-                iconSize={40}
-              />
-              <StatCard
-                label="Tarjetas Rojas"
-                value={mockStats.redCards}
-                icon={tarjetaRoja}
-                iconSize={40}
-              />
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', padding: '10px' }}>
+              <StatCard label="Goles Anotados"     value={mockStats.goals}       icon={balon}          max={mockStats.maxGoals}   iconSize={44} />
+              <StatCard label="Partidos Jugados"   value={mockStats.matches}     icon={zapato}         max={mockStats.maxMatches} iconSize={50} />
+              <StatCard label="Tarjetas Amarillas" value={mockStats.yellowCards} icon={tarjetaAmarilla}                            iconSize={40} />
+              <StatCard label="Tarjetas Rojas"     value={mockStats.redCards}    icon={tarjetaRoja}                                iconSize={40} />
             </div>
           </div>
 
           {/* Perfil */}
           <div style={{
-            backgroundColor: 'rgba(0,0,0,0.25)',
-            borderRadius: '12px',
-            overflow: 'hidden',
-            minWidth: '140px',
+            backgroundColor: 'rgba(0,0,0,0.25)', borderRadius: '12px',
+            overflow: 'hidden', minWidth: '140px',
+            display: 'flex', flexDirection: 'column',
           }}>
             <button
               onClick={() => navigate('/perfil')}
               style={{
-                backgroundColor: '#FFBF00',
-                border: 'none',
-                width: '100%',
-                padding: '8px 16px',
-                fontFamily: "'Montserrat', sans-serif",
-                fontWeight: 'bold',
-                fontSize: '13px',
-                color: '#000',
-                cursor: 'pointer',
+                backgroundColor: '#FFBF00', border: 'none', width: '100%',
+                padding: '8px 16px', fontFamily: "'Montserrat', sans-serif",
+                fontWeight: 'bold', fontSize: '13px', color: '#000', cursor: 'pointer',
               }}
             >
               Perfil
             </button>
-            <div style={{ padding: '12px', display: 'flex', justifyContent: 'center' }}>
+
+            <div style={{ padding: '12px', display: 'flex', justifyContent: 'center', flex: 1 }}>
               <svg width="70" height="80" viewBox="0 0 100 110" fill="none">
                 <circle cx="50" cy="35" r="28" fill="#888"/>
                 <ellipse cx="50" cy="95" rx="40" ry="22" fill="#888"/>
               </svg>
             </div>
+
+            {/* Botón capitán */}
+            <div style={{ padding: '0 10px 12px' }}>
+              <button
+                onClick={() => setMostrarModal(true)}
+                style={{
+                  backgroundColor: '#FFBF00', border: 'none',
+                  borderRadius: '20px', padding: '7px 10px',
+                  width: '100%',
+                  fontFamily: "'Montserrat', sans-serif",
+                  fontWeight: 800, fontSize: '10px', color: '#000',
+                  cursor: 'pointer', letterSpacing: '0.2px',
+                  lineHeight: 1.3, textAlign: 'center',
+                  transition: 'all 0.2s',
+                  boxShadow: '0 2px 8px rgba(255,191,0,0.35)',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#e6ac00'; }}
+                onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#FFBF00'; }}
+              >
+                Convertirse en Capitán
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Tabla de Posiciones */}
+        {/* ── Tabla de Posiciones ───────────────────────────────────────── */}
         <div style={{
-          backgroundColor: 'rgba(0,0,0,0.25)',
-          borderRadius: '12px',
-          overflow: 'hidden',
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          minHeight: 0,
+          backgroundColor: 'rgba(0,0,0,0.25)', borderRadius: '12px',
+          overflow: 'hidden', flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0,
         }}>
           <div style={{
-            backgroundColor: '#FFBF00',
-            padding: '8px 16px',
-            fontFamily: "'Montserrat', sans-serif",
-            fontWeight: 'bold',
-            fontSize: '13px',
-            color: '#000',
-            flexShrink: 0,
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
+            backgroundColor: '#FFBF00', padding: '8px 16px',
+            fontFamily: "'Montserrat', sans-serif", fontWeight: 'bold', fontSize: '13px', color: '#000',
+            flexShrink: 0, display: 'flex', alignItems: 'center', gap: '8px',
           }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
               <path d="M6 2h12v6a6 6 0 01-12 0V2z" stroke="#000" strokeWidth="1.8"/>
@@ -252,8 +322,7 @@ const DashboardJugador = () => {
               <thead>
                 <tr style={{
                   borderBottom: '1px solid rgba(255,255,255,0.2)',
-                  position: 'sticky',
-                  top: 0,
+                  position: 'sticky', top: 0,
                   backgroundColor: 'rgba(0,40,20,0.95)',
                 }}>
                   <th style={{ ...thStyle, width: '36px' }}>#</th>
@@ -279,16 +348,10 @@ const DashboardJugador = () => {
                   >
                     <td style={{ ...tdStyle, textAlign: 'center' }}>
                       <div style={{
-                        width: '22px',
-                        height: '22px',
-                        borderRadius: '50%',
+                        width: '22px', height: '22px', borderRadius: '50%',
                         backgroundColor: positionColors[s.position] || 'rgba(255,255,255,0.2)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        margin: '0 auto',
-                        fontSize: '11px',
-                        fontWeight: 'bold',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        margin: '0 auto', fontSize: '11px', fontWeight: 'bold',
                         color: s.position <= 3 ? '#000' : '#fff',
                       }}>
                         {s.position}
@@ -303,15 +366,10 @@ const DashboardJugador = () => {
                     <td style={tdStyle}>{s.lost}</td>
                     <td style={tdStyle}>{s.gf}</td>
                     <td style={tdStyle}>{s.gc}</td>
-                    <td style={{
-                      ...tdStyle,
-                      color: s.gd > 0 ? '#4CAF50' : s.gd < 0 ? '#ff4444' : '#fff',
-                    }}>
+                    <td style={{ ...tdStyle, color: s.gd > 0 ? '#4CAF50' : s.gd < 0 ? '#ff4444' : '#fff' }}>
                       {s.gd > 0 ? `+${s.gd}` : s.gd}
                     </td>
-                    <td style={{ ...tdStyle, color: '#FFBF00', fontWeight: 'bold' }}>
-                      {s.points}
-                    </td>
+                    <td style={{ ...tdStyle, color: '#FFBF00', fontWeight: 'bold' }}>{s.points}</td>
                   </tr>
                 ))}
               </tbody>
