@@ -291,7 +291,7 @@ const LoginPage = () => {
             Otros métodos de ingreso
           </p>
           <button
-            onClick={() => { window.location.href = 'http://localhost:8081/oauth2/authorization/google'; }}
+            onClick={() => { window.location.href = `${import.meta.env.VITE_API_URL || 'http://localhost:8081'}/oauth2/authorization/google`; }}
             style={{
               width: '100%',
               padding: '8px',
