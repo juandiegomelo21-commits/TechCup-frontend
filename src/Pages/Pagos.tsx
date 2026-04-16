@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import DashboardLayout from '../../Components/layout/DashboardLayout';
+import DashboardLayout from '../Components/layout/DashboardLayout'; // Ruta corregida
 
 // ─── Tipos ─────────────────────────────────────────────────────────────────────
 interface TorneoPago {
@@ -25,12 +25,27 @@ const OVAL_BUTTON: React.CSSProperties = {
   fontSize: '11px',
   textTransform: 'uppercase',
   color: '#1a1a1a',
+  transition: 'transform 0.1s, opacity 0.2s',
 };
+
+// ─── Icono de Subida (SVG redondeado como la imagen de referencia) ──────────────
+const UploadIconRounded = () => (
+  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" style={{ color: '#888888' }}>
+    {/* Círculo de fondo claro */}
+    <circle cx="12" cy="12" r="10" fill="#f0f0f5" />
+
+    {/* Icono de subida (flecha y bandeja) */}
+    <path d="M12 4L12 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    <path d="M9 7L12 4L15 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M5 16C5 17.6569 6.34315 19 8 19H16C17.6569 19 19 17.6569 19 16V14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+  </svg>
+);
 
 // ─── Componente Principal ──────────────────────────────────────────────────────
 const Pagos = () => {
   const [torneoSeleccionado, setTorneoSeleccionado] = useState<TorneoPago | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [fileUploaded, setFileUploaded] = useState<File | null>(null); // Estado para el archivo subido
 
   const listaTorneos: TorneoPago[] = [
     { id: 1, nombre: 'Copa Universitaria 2026', estado: 'Pendiente' },
@@ -41,6 +56,14 @@ const Pagos = () => {
   const abrirPago = (torneo: TorneoPago) => {
     setTorneoSeleccionado(torneo);
     setIsModalOpen(true);
+    setFileUploaded(null); // Reiniciar estado al abrir
+  };
+
+  // Simulación de subida de archivo
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+      setFileUploaded(event.target.files[0]);
+    }
   };
 
   return (
@@ -67,6 +90,8 @@ const Pagos = () => {
               <button
                 style={OVAL_BUTTON}
                 onClick={() => abrirPago(torneo)}
+                onMouseOver={(e) => (e.currentTarget.style.opacity = '0.9')}
+                onMouseOut={(e) => (e.currentTarget.style.opacity = '1')}
               >
                 Pagar Inscripción
               </button>
@@ -74,7 +99,7 @@ const Pagos = () => {
           ))}
         </div>
 
-        {/* Modal de Pago (Réplica exacta de tu imagen) */}
+        {/* Modal de Pago (Réplica exacta) */}
         {isModalOpen && torneoSeleccionado && (
           <div style={{
             position: 'fixed', inset: 0,
@@ -104,6 +129,7 @@ const Pagos = () => {
                 padding: '15px',
                 borderRadius: '12px',
                 textAlign: 'center',
+                fontFamily: "'Montserrat', sans-serif",
                 fontWeight: 800,
                 marginBottom: '20px',
                 boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
@@ -119,16 +145,39 @@ const Pagos = () => {
               {/* Formulario */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                 <label style={{ fontSize: '12px', fontWeight: 700 }}>Subir Recibo de Pago</label>
-                <div style={{
-                  border: '2px dashed #ccc',
-                  padding: '30px',
-                  textAlign: 'center',
-                  borderRadius: '12px',
-                  cursor: 'pointer',
-                  backgroundColor: '#fff'
-                }}>
-                  <span style={{ fontSize: '24px' }}>📤</span>
-                  <p style={{ fontSize: '11px', color: '#666', marginTop: '10px' }}>Toque para subir o arrastre su recibo aquí<br/>PNG, JPG, PDF (máx 5MB)</p>
+
+                {/* ─── Área de Subida con ICONO ACTUALIZADO ─── */}
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type="file"
+                    id="reciboPago"
+                    onChange={handleFileChange}
+                    accept=".png, .jpg, .jpeg, .pdf"
+                    style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer', zIndex: 10 }}
+                  />
+                  <div style={{
+                    border: '2px dashed #ccc',
+                    padding: '30px',
+                    textAlign: 'center',
+                    borderRadius: '12px',
+                    backgroundColor: '#fff',
+                    transition: 'border-color 0.2s',
+                  }}>
+                    {/* Aquí está el componente con el icono redondeado */}
+                    <div style={{ display: 'flex', justifyContent: 'center' }}>
+                      <UploadIconRounded />
+                    </div>
+
+                    <p style={{ fontSize: '11px', color: '#666', marginTop: '12px', lineHeight: '1.4' }}>
+                      Toque para subir o arrastre su recibo aquí<br/>PNG, JPG, PDF (máx 5MB)
+                    </p>
+
+                    {fileUploaded && (
+                      <p style={{ fontSize: '11px', color: '#1a73e8', marginTop: '8px', fontWeight: 600 }}>
+                        ✓ Archivo seleccionado: {fileUploaded.name}
+                      </p>
+                    )}
+                  </div>
                 </div>
 
                 <div>
@@ -149,16 +198,23 @@ const Pagos = () => {
                   <span style={{ color: '#FFBF00' }}>●</span> Estado Actual: <strong>Envío Pendiente</strong>
                 </div>
 
-                <button style={{
-                  backgroundColor: '#e0e0e0',
-                  color: '#999',
-                  border: 'none',
-                  padding: '14px',
-                  borderRadius: '12px',
-                  fontWeight: 700,
-                  cursor: 'not-allowed',
-                  marginTop: '10px'
-                }}>
+                {/* Botón de Enviar (activo si hay archivo) */}
+                <button
+                  style={{
+                    backgroundColor: fileUploaded ? '#e0b000' : '#e0e0e0', // Amarillo oscuro si está activo
+                    color: fileUploaded ? '#1a1a1a' : '#999',
+                    border: 'none',
+                    padding: '14px',
+                    borderRadius: '12px',
+                    fontWeight: 700,
+                    cursor: fileUploaded ? 'pointer' : 'not-allowed',
+                    marginTop: '10px',
+                    width: '100%',
+                    transition: 'background-color 0.2s',
+                    opacity: fileUploaded ? 1 : 0.7
+                  }}
+                  disabled={!fileUploaded}
+                >
                   Enviar para Revisión
                 </button>
                 <p style={{ fontSize: '9px', textAlign: 'center', color: '#999' }}>Su pago será revisado en un plazo de 24-48 horas.</p>
