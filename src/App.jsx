@@ -12,6 +12,7 @@ import ForgotPasswordPage from './Pages/ForgotPasswordPage';
 import PlayerProfilePage from './Pages/PlayerProfilePage';
 import PlayerSearchPage from './Pages/PlayerSearchPage';
 import CreateTournamentPage from './Pages/CreateTournamentPage';
+import TournamentDetailPage from './Pages/TournamentDetailPage';
 import MiEquipo from './Pages/MiEquipo';
 import PizarraTactica from './Pages/PizarraTactica';
 import OAuthCallbackPage from './Pages/OAuthCallbackPage';
@@ -80,6 +81,11 @@ function App() {
         <Route path="/create-tournament" element={
           <ProtectedRoute roles={['organizador']}>
             <CreateTournamentPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/torneo/:id" element={
+          <ProtectedRoute roles={['organizador']}>
+            <TournamentDetailPage />
           </ProtectedRoute>
         } />
       </Routes>

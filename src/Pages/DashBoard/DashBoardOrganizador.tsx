@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../Components/layout/DashboardLayout';
 import { getTeamsApi, type TeamResponse } from '../../api/teamService';
+import { getTournamentsApi, type TournamentResponse } from '../../api/tournamentService';
 
 const IconCrearTorneo = () => (
   <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
@@ -44,17 +45,33 @@ const accesos = [
 
 const COLORS = ['#e74c3c','#27ae60','#e67e22','#8e44ad','#2980b9','#16a085','#c0392b','#1abc9c'];
 
+const formatDate = (iso: string) => {
+  const d = new Date(iso);
+  return d.toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' });
+};
+
+const estadoColor: Record<string, string> = {
+  ACTIVO: '#2ecc71',
+  PENDIENTE: '#f39c12',
+  FINALIZADO: '#e74c3c',
+};
+
 const DashboardOrganizador = () => {
   const navigate = useNavigate();
   const [equipos, setEquipos] = useState<TeamResponse[]>([]);
+  const [torneos, setTorneos] = useState<TournamentResponse[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getTeamsApi()
-      .then(setEquipos)
-      .catch(() => setEquipos([]))
+    Promise.all([getTeamsApi(), getTournamentsApi()])
+      .then(([teams, tournaments]) => {
+        setEquipos(teams);
+        setTorneos(tournaments);
+      })
+      .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
+
 
   const card: React.CSSProperties = {
     backgroundColor: 'rgba(255,255,255,0.10)',
@@ -79,6 +96,11 @@ const DashboardOrganizador = () => {
             <span style={{ backgroundColor: '#FFBF00', color: '#000', fontSize: '11px', fontWeight: 700, padding: '4px 12px', borderRadius: '20px', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
               {equipos.length} equipos
             </span>
+            {torneos.length > 0 && (
+              <span style={{ backgroundColor: 'rgba(255,255,255,0.15)', color: '#fff', fontSize: '11px', fontWeight: 700, padding: '4px 12px', borderRadius: '20px', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
+                {torneos.length} {torneos.length === 1 ? 'torneo' : 'torneos'}
+              </span>
+            )}
           </div>
           <div style={{ backgroundColor: '#FFBF00', borderRadius: '10px', padding: '9px 24px', fontFamily: "'Montserrat', sans-serif", fontWeight: 700, fontSize: '14px', color: '#000', cursor: 'pointer' }}
             onClick={() => navigate('/player-profile')}>
@@ -101,6 +123,55 @@ const DashboardOrganizador = () => {
               </div>
             ))}
           </div>
+        </div>
+
+        {/* Torneos */}
+        <div style={card}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
+            <p style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: '#ffffff', fontFamily: "'Montserrat', sans-serif" }}>
+              Torneos
+            </p>
+            <button onClick={() => navigate('/create-tournament')} style={{ backgroundColor: '#FFBF00', color: '#000', border: 'none', borderRadius: '20px', padding: '6px 16px', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>
+              + Nuevo
+            </button>
+          </div>
+          {loading ? (
+            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', margin: 0 }}>Cargando...</p>
+          ) : torneos.length === 0 ? (
+            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', margin: 0 }}>No hay ningún torneo creado aún.</p>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '220px', overflowY: 'auto' }}>
+              {[...torneos].reverse().map((t) => (
+                <div key={t.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: '12px', padding: '12px 16px', flexWrap: 'wrap', gap: '10px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ width: '36px', height: '36px', borderRadius: '10px', backgroundColor: '#FFBF00', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>🏆</div>
+                    <div>
+                      <p style={{ margin: 0, fontSize: '14px', fontWeight: 700, color: '#fff', fontFamily: "'Montserrat', sans-serif" }}>{t.name}</p>
+                      <p style={{ margin: '3px 0 0 0', fontSize: '11px', color: 'rgba(255,255,255,0.55)', fontFamily: "'Inter', sans-serif" }}>
+                        {formatDate(t.startDate)} → {formatDate(t.endDate)}
+                      </p>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+                    <div style={{ textAlign: 'center' }}>
+                      <p style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: '#FFBF00', fontFamily: "'Montserrat', sans-serif" }}>{t.maxTeams}</p>
+                      <p style={{ margin: '2px 0 0 0', fontSize: '9px', color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Máx. equipos</p>
+                    </div>
+                    <div style={{ textAlign: 'center' }}>
+                      <p style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: '#FFBF00', fontFamily: "'Montserrat', sans-serif" }}>${t.registrationFee.toLocaleString('es-CO')}</p>
+                      <p style={{ margin: '2px 0 0 0', fontSize: '9px', color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Cuota</p>
+                    </div>
+                    <span style={{ backgroundColor: estadoColor[t.currentState] ?? '#888', color: '#fff', fontSize: '10px', fontWeight: 700, padding: '4px 10px', borderRadius: '20px', letterSpacing: '0.5px', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+                      {t.currentState ?? 'PENDIENTE'}
+                    </span>
+                    <button onClick={() => navigate(`/torneo/${t.id}`)} style={{ backgroundColor: '#FFBF00', color: '#000', border: 'none', borderRadius: '20px', padding: '6px 16px', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap' }}>
+                      Ver →
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Equipos Inscritos */}
