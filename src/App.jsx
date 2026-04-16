@@ -10,10 +10,11 @@ import EmailSentPage from './Pages/EmailSentPage';
 import ForgotPasswordPage from './Pages/ForgotPasswordPage';
 import PlayerProfilePage from './Pages/PlayerProfilePage';
 import PlayerSearchPage from './Pages/PlayerSearchPage';
-import CreateTournamentPage from './Pages/CreateTournamentPage';
 import MiEquipo from './Pages/MiEquipo';
 import PizarraTactica from './Pages/PizarraTactica';
 import OAuthCallbackPage from './Pages/OAuthCallbackPage';
+import CreateTournamentPage from './Pages/CreateTournamentPage';
+
 
 function App() {
   return (
@@ -28,7 +29,7 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/player-profile" element={<PlayerProfilePage />} />
         <Route path="/player-search" element={<PlayerSearchPage />} />
-        <Route path="/create-tournament" element={<CreateTournamentPage />} />
+        <Route path="/torneo/crear" element={<CreateTournamentPage />} />
         <Route path="/dashboard/org" element={<DashboardOrganizador />} />
         <Route path="/dashboard/arbitro" element={<DashboardArbitro />} />
         <Route path="/equipo" element={<MiEquipo />} />
