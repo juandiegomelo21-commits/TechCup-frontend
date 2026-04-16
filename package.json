@@ -8,7 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "start:back": "node scripts/start-backend.js",
-    "start": "concurrently --names \"BACK,FRONT\" --prefix-colors \"bgBlue.bold,bgGreen.bold\" \"npm run start:back\" \"npm run dev\""
+    "start": "npx concurrently --names \"BACK,FRONT\" --prefix-colors \"bgBlue.bold,bgGreen.bold\" \"npm run start:back\" \"npm run dev\""
   },
   "dependencies": {
     "@react-oauth/google": "^0.13.5",
