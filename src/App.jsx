@@ -28,7 +28,7 @@ function App() {
         <Route path="/email-sent" element={<EmailSentPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/player-profile" element={<PlayerProfilePage />} />
-        <Route path="/player-search" element={<PlayerSearchPage />} />
+        <Route path="/mercado" element={<PlayerSearchPage />} />
         <Route path="/torneo/crear" element={<CreateTournamentPage />} />
         <Route path="/dashboard/org" element={<DashboardOrganizador />} />
         <Route path="/dashboard/arbitro" element={<DashboardArbitro />} />
