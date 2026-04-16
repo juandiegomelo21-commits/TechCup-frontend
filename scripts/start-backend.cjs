@@ -6,9 +6,9 @@ const os = require('os');
 const backendDir = path.resolve(__dirname, '..', '../Tech-Up-Futbol-BackEnd');
 
 if (!fs.existsSync(backendDir)) {
-  console.error(`\n[ERROR] No se encontró el backend en: ${backendDir}`);
-  console.error('Asegúrate de que ambos proyectos estén en la misma carpeta padre.');
-  process.exit(1);
+  console.warn('\n[BACK] ⚠️  Backend no encontrado — arrancando solo el frontend.');
+  console.warn('[BACK] Para correr el backend, clona Tech-Up-Futbol-BackEnd en la misma carpeta que este proyecto.\n');
+  process.exit(0);
 }
 
 const isWindows = os.platform() === 'win32';
