@@ -2,17 +2,18 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logo from '../assets/Logo.png';
 import cristiano from '../assets/Cristiano.png';
+import { useAuth } from '../Hook/UseAuth';
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const { login, loading, error: authError } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     setEmailError('');
     setPasswordError('');
     let valid = true;
@@ -32,11 +33,19 @@ const LoginPage = () => {
 
     if (!valid) return;
 
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      navigate('/dashboard');
-    }, 1500);
+    const rol = await login({ email, password });
+    if (rol) {
+      switch (rol) {
+        case 'organizador':
+          navigate('/dashboard/org');
+          break;
+        case 'arbitro':
+          navigate('/dashboard/arbitro');
+          break;
+        default:
+          navigate('/dashboard');
+      }
+    }
   };
 
   return (
@@ -282,7 +291,7 @@ const LoginPage = () => {
             Otros métodos de ingreso
           </p>
           <button
-            onClick={() => {}}
+            onClick={() => { window.location.href = 'http://localhost:8081/oauth2/authorization/google'; }}
             style={{
               width: '100%',
               padding: '8px',
@@ -313,6 +322,13 @@ const LoginPage = () => {
             ¿Olvidaste tu contraseña?
           </p>
         </div>
+
+        {/* Error del backend */}
+        {authError && (
+          <p style={{ color: '#cc0000', fontSize: '13px', fontFamily: "'Inter', sans-serif", margin: '0', textAlign: 'center' }}>
+            {authError}
+          </p>
+        )}
 
         {/* Línea 285 — Botón */}
         <button
