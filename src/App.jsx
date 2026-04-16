@@ -15,6 +15,9 @@ import MiEquipo from './Pages/MiEquipo';
 import PizarraTactica from './Pages/PizarraTactica';
 import OAuthCallbackPage from './Pages/OAuthCallbackPage';
 import CreateTournamentPage from './Pages/CreateTournamentPage';
+import RefereeProfilePage from '/.Pages/RefereeProfilePage'
+import AdminProfilePage from '/.Pages/AdminProfilePage'
+
 
 
 function App() {
@@ -37,6 +40,8 @@ function App() {
         <Route path="/equipo/pizarra" element={<PizarraTactica />} />
         <Route path="/oauth2/callback" element={<OAuthCallbackPage />} />
         <Route path="/mercado" element={<PlayerSearchPage />} />
+        <Route path="/referee-profile" element={<RefereeProfilePage />} />
+        <Route path="/admin-profile" element={<AdminProfilePage />} />
 
 
       </Routes>
