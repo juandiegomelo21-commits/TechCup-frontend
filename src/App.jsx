@@ -17,8 +17,8 @@ import OAuthCallbackPage from './Pages/OAuthCallbackPage';
 import CreateTournamentPage from './Pages/CreateTournamentPage';
 import RefereeProfilePage from '/.Pages/RefereeProfilePage'
 import AdminProfilePage from '/.Pages/AdminProfilePage'
-
-
+import Torneo from './Pages/Torneos';
+import Pagos from './Pages/Pagos';
 
 function App() {
   return (
@@ -33,6 +33,7 @@ function App() {
         <Route path="/email-sent" element={<EmailSentPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/player-profile" element={<PlayerProfilePage />} />
+        <Route path="/mercado" element={<PlayerSearchPage />} />
         <Route path="/torneo/crear" element={<CreateTournamentPage />} />
         <Route path="/dashboard/org" element={<DashboardOrganizador />} />
         <Route path="/dashboard/arbitro" element={<DashboardArbitro />} />
@@ -42,7 +43,8 @@ function App() {
         <Route path="/mercado" element={<PlayerSearchPage />} />
         <Route path="/referee-profile" element={<RefereeProfilePage />} />
         <Route path="/admin-profile" element={<AdminProfilePage />} />
-
+        <Route path="/torneo" element={<Torneo />} />
+        <Route path="/pagos" element={<Pagos />} />
 
       </Routes>
     </BrowserRouter>
