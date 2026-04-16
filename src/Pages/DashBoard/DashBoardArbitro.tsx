@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import DashboardLayout from '../../components/layout/DashboardLayout';
+import DashboardLayout from '../../Components/layout/DashboardLayout';
 import silbato from '../../assets/silbato.png';
 import tarjetaAmarilla from '../../assets/tarjetaAmarilla.png';
 import tarjetaRoja from '../../assets/tarjetaRoja.png';
