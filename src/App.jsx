@@ -15,7 +15,7 @@ import MiEquipo from './Pages/MiEquipo';
 import PizarraTactica from './Pages/PizarraTactica';
 import OAuthCallbackPage from './Pages/OAuthCallbackPage';
 import CreateTournamentPage from './Pages/CreateTournamentPage';
-
+import Torneo from './Pages/Torneos';
 
 function App() {
   return (
@@ -38,6 +38,8 @@ function App() {
         <Route path="/equipo/pizarra" element={<PizarraTactica />} />
         <Route path="/oauth2/callback" element={<OAuthCallbackPage />} />
         <Route path="/mercado" element={<PlayerSearchPage />} />
+        <Route path="/torneo" element={<Torneo />} />
+
 
 
       </Routes>
