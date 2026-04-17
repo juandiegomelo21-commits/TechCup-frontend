@@ -83,12 +83,11 @@ const CloseDrawerIcon = () => (
   </svg>
 );
 
-const mainItems: SidebarItem[] = [
-  { label: 'Panel Principal', path: '/dashboard', icon: <PanelIcon /> },
-  { label: 'Mi Equipo',       path: '/equipo',    icon: <EquipoIcon /> },
-  { label: 'Torneo',          path: '/torneo',    icon: <TorneoIcon /> },
-  { label: 'Pagos',           path: '/pagos',     icon: <PagosIcon /> },
-  { label: 'Historial',       path: '/historial', icon: <HistorialIcon /> },
+const staticItems: SidebarItem[] = [
+  { label: 'Mi Equipo',  path: '/equipo',    icon: <EquipoIcon /> },
+  { label: 'Torneo',     path: '/torneo',    icon: <TorneoIcon /> },
+  { label: 'Pagos',      path: '/pagos',     icon: <PagosIcon /> },
+  { label: 'Historial',  path: '/historial', icon: <HistorialIcon /> },
 ];
 
 const bottomItems: SidebarItem[] = [
@@ -97,14 +96,33 @@ const bottomItems: SidebarItem[] = [
   { label: 'Cerrar Sesión',        path: '/',         icon: <CerrarIcon /> },
 ];
 
+const getDashboardPath = () => {
+  const rol = localStorage.getItem('rol');
+  if (rol === 'capitan')      return '/dashboard/capitan';
+  if (rol === 'organizador')  return '/dashboard/org';
+  if (rol === 'arbitro')      return '/dashboard/arbitro';
+  return '/dashboard';
+};
+
 const Sidebar = ({ onClose, isMobile }: SidebarProps) => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const mainItems: SidebarItem[] = [
+    { label: 'Panel Principal', path: '/dashboard', icon: <PanelIcon /> },
+    ...staticItems,
+  ];
+
   const handleNav = (path: string) => {
-    navigate(path);
+    const resolvedPath = path === '/dashboard' ? getDashboardPath() : path;
+    navigate(resolvedPath);
     if (isMobile && onClose) onClose();
   };
+
+  const isActive = (path: string) =>
+    path === '/dashboard'
+      ? location.pathname === getDashboardPath()
+      : location.pathname === path;
 
   const itemStyle = (path: string): React.CSSProperties => ({
     display: 'flex',
@@ -115,10 +133,10 @@ const Sidebar = ({ onClose, isMobile }: SidebarProps) => {
     cursor: 'pointer',
     fontFamily: "'Inter', sans-serif",
     fontSize: '13px',
-    color: location.pathname === path ? '#FFBF00' : '#ffffff',
-    backgroundColor: location.pathname === path ? 'rgba(255,191,0,0.15)' : 'transparent',
+    color: isActive(path) ? '#FFBF00' : '#ffffff',
+    backgroundColor: isActive(path) ? 'rgba(255,191,0,0.15)' : 'transparent',
     transition: 'all 0.2s',
-    fontWeight: location.pathname === path ? 'bold' : 'normal',
+    fontWeight: isActive(path) ? 'bold' : 'normal',
   });
 
   return (
@@ -160,7 +178,7 @@ const Sidebar = ({ onClose, isMobile }: SidebarProps) => {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: 1 }}>
         {mainItems.map((item) => (
           <div key={item.path} style={itemStyle(item.path)} onClick={() => handleNav(item.path)}>
-            <span style={{ color: location.pathname === item.path ? '#FFBF00' : '#ffffff', display: 'flex' }}>
+            <span style={{ color: isActive(item.path) ? '#FFBF00' : '#ffffff', display: 'flex' }}>
               {item.icon}
             </span>
             <span>{item.label}</span>

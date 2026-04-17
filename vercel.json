@@ -1,0 +1,8 @@
+{
+  "buildCommand": "npm install && npx vite build",
+  "outputDirectory": "dist",
+  "installCommand": "echo skip",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}

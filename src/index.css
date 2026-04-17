@@ -21,3 +21,76 @@ html, body, #root {
   margin: 0;
   padding: 0;
 }
+
+/* ── Responsive utilities ─────────────────────────────────────────── */
+
+.grid-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  padding: 10px;
+}
+
+.grid-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.grid-3col {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.grid-players {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.dash-top-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+}
+
+.scroll-x {
+  overflow-x: auto;
+}
+
+.hide-mobile { display: block; }
+
+@media (max-width: 768px) {
+  .grid-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .grid-2col {
+    grid-template-columns: 1fr;
+  }
+
+  .grid-3col {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .grid-players {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .dash-top-row {
+    grid-template-columns: 1fr;
+  }
+
+  .hide-mobile { display: none; }
+}
+
+@media (max-width: 480px) {
+  .grid-3col {
+    grid-template-columns: 1fr;
+  }
+
+  .grid-players {
+    grid-template-columns: 1fr;
+  }
+}

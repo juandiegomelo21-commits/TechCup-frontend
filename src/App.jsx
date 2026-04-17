@@ -2,10 +2,10 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import WelcomePage from './Pages/WelcomePage';
 import LoginPage from './Pages/LoginPage';
 import RegisterPage from './Pages/RegisterPage';
-import DashboardArbitro from './Pages/DashBoard/DashboardArbitro';
-import DashboardOrganizador from './Pages/DashBoard/DashboardOrganizador';
-import DashboardJugador from './Pages/DashBoard/DashboardJugador';
-import DashboardCapitan from './Pages/DashBoard/DashboardCapitan';
+import DashboardArbitro from './Pages/DashBoard/DashBoardArbitro';
+import DashboardOrganizador from './Pages/DashBoard/DashBoardOrganizador';
+import DashboardJugador from './Pages/DashBoard/DashBoardJugador';
+import DashboardCapitan from './Pages/DashBoard/DashBoardCapitan';
 import AccountCreatedPage from './Pages/AccountCreatedPage';
 import EmailSentPage from './Pages/EmailSentPage';
 import ForgotPasswordPage from './Pages/ForgotPasswordPage';
@@ -15,8 +15,14 @@ import MiEquipo from './Pages/MiEquipo';
 import PizarraTactica from './Pages/PizarraTactica';
 import OAuthCallbackPage from './Pages/OAuthCallbackPage';
 import CreateTournamentPage from './Pages/CreateTournamentPage';
+import RefereeProfilePage from './Pages/RefereeProfilePage';
+import AdminProfilePage from './Pages/AdminProfilePage';
+import TournamentDetailPage from './Pages/TournamentDetailPage';
 import Torneo from './Pages/Torneos';
 import Pagos from './Pages/Pagos';
+import Historial from './Pages/Historial';
+import Reglas from './Pages/Reglas';
+import ProfileRouter from './Pages/ProfileRouter';
 
 function App() {
   return (
@@ -32,22 +38,23 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/player-profile" element={<PlayerProfilePage />} />
         <Route path="/mercado" element={<PlayerSearchPage />} />
-        <Route path="/torneo/crear" element={<CreateTournamentPage />} />
+        <Route path="/torneo/crear" element={localStorage.getItem('rol') === 'organizador' ? <CreateTournamentPage /> : <ProfileRouter />} />
         <Route path="/dashboard/org" element={<DashboardOrganizador />} />
         <Route path="/dashboard/arbitro" element={<DashboardArbitro />} />
         <Route path="/equipo" element={<MiEquipo />} />
         <Route path="/equipo/pizarra" element={<PizarraTactica />} />
         <Route path="/oauth2/callback" element={<OAuthCallbackPage />} />
-        <Route path="/mercado" element={<PlayerSearchPage />} />
+        <Route path="/referee-profile" element={<RefereeProfilePage />} />
+        <Route path="/admin-profile" element={<AdminProfilePage />} />
         <Route path="/torneo" element={<Torneo />} />
+        <Route path="/torneo/:id" element={<TournamentDetailPage />} />
         <Route path="/pagos" element={<Pagos />} />
-
-
-
+        <Route path="/historial" element={<Historial />} />
+        <Route path="/torneo/reglas" element={<Reglas />} />
+        <Route path="/perfil" element={<ProfileRouter />} />
       </Routes>
     </BrowserRouter>
   );
 }
 
 export default App;
-

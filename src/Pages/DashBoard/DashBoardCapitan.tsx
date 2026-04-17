@@ -1,28 +1,15 @@
 import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import DashboardLayout from '../../Components/layout/DashboardLayout';
-import Badge from '../../Components/ui/Bagde';
-import { Invitation, Player } from '../../Types';
+import { getPlayersApi, PlayerResponse } from '../../api/playerService';
+import { getTeamsApi, invitePlayerApi } from '../../api/teamService';
 
-const mockPlayers: Player[] = [
-  { id: '1', name: 'Carlos Mendoza', position: 'Delantero', age: 24 },
-  { id: '2', name: 'Ana Rodríguez', position: 'Defensa', age: 22 },
-  { id: '3', name: 'Luis García', position: 'Mediocampista', age: 26 },
-  { id: '4', name: 'María López', position: 'Portera', age: 23 },
-  { id: '5', name: 'Jorge Martínez', position: 'Delantero', age: 25 },
-  { id: '6', name: 'Sofía Torres', position: 'Mediocampista', age: 21 },
-];
-
-const mockInvitations: Invitation[] = [
-  { name: 'Pedro Sánchez', date: '2026-04-05', status: 'Aceptada' },
-  { name: 'Laura Díaz', date: '2026-04-04', status: 'Pendiente' },
-  { name: 'Miguel Ruiz', date: '2026-04-03', status: 'Aceptada' },
-  { name: 'Carmen Vega', date: '2026-04-02', status: 'Rechazada' },
-  { name: 'Roberto Castro', date: '2026-04-01', status: 'Pendiente' },
-  { name: 'Isabel Moreno', date: '2026-03-31', status: 'Aceptada' },
-];
-
-const currentPlayers = 12;
-const maxPlayers = 20;
+const positionLabel: Record<string, string> = {
+  GoalKeeper: 'Portero',
+  Defender: 'Defensa',
+  Midfielder: 'Mediocampista',
+  Winger: 'Extremo',
+};
 
 const thStyle: React.CSSProperties = {
   fontFamily: "'Inter', sans-serif",
@@ -43,6 +30,57 @@ const tdStyle: React.CSSProperties = {
 
 const DashboardCapitan = () => {
   const navigate = useNavigate();
+  const [availablePlayers, setAvailablePlayers] = useState<PlayerResponse[]>([]);
+  const [teamPlayers, setTeamPlayers] = useState<PlayerResponse[]>([]);
+  const [teamId, setTeamId] = useState<string | null>(null);
+  const [currentPlayers, setCurrentPlayers] = useState(0);
+  const [invitingId, setInvitingId] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const maxPlayers = 20;
+
+  useEffect(() => {
+    const userId = localStorage.getItem('userId') ?? '';
+
+    Promise.all([getPlayersApi(), getTeamsApi()])
+      .then(([allPlayers, teams]) => {
+        const myTeam = teams.find(t => t.captainId === userId);
+
+        if (myTeam) {
+          setTeamId(myTeam.id);
+          const inTeam = allPlayers.filter(p => myTeam.players.includes(p.id));
+          setTeamPlayers(inTeam);
+          setCurrentPlayers(inTeam.length);
+          const teamPlayerIds = new Set(myTeam.players);
+          setAvailablePlayers(
+            allPlayers.filter(p => p.disponible && !p.haveTeam && p.id !== userId && !teamPlayerIds.has(p.id))
+          );
+        } else {
+          setAvailablePlayers(
+            allPlayers.filter(p => p.disponible && !p.haveTeam && p.id !== userId)
+          );
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const handleInvitar = async (player: PlayerResponse) => {
+    if (!teamId) {
+      setErrorMsg('No tienes un equipo creado aún.');
+      return;
+    }
+    setInvitingId(player.id);
+    setErrorMsg(null);
+    try {
+      await invitePlayerApi(teamId, player.id);
+      setAvailablePlayers(prev => prev.filter(p => p.id !== player.id));
+      setTeamPlayers(prev => [...prev, player]);
+      setCurrentPlayers(prev => prev + 1);
+    } catch {
+      setErrorMsg(`No se pudo invitar a ${player.fullname}. Intenta de nuevo.`);
+    } finally {
+      setInvitingId(null);
+    }
+  };
 
   return (
     <DashboardLayout>
@@ -55,7 +93,7 @@ const DashboardCapitan = () => {
       }}>
 
         {/* Fila superior */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '10px' }}>
+        <div className="dash-top-row">
 
           {/* Resumen del Equipo */}
           <div style={{
@@ -78,9 +116,7 @@ const DashboardCapitan = () => {
 
             <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
 
-              {/* Jugadores inscritos */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                {/* Icono escudo */}
                 <div style={{
                   width: '48px',
                   height: '48px',
@@ -105,7 +141,6 @@ const DashboardCapitan = () => {
                       {currentPlayers} / {maxPlayers}
                     </span>
                   </div>
-                  {/* Barra progreso */}
                   <div style={{ width: '100%', backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: '4px', height: '6px' }}>
                     <div style={{
                       width: `${(currentPlayers / maxPlayers) * 100}%`,
@@ -120,7 +155,6 @@ const DashboardCapitan = () => {
                 </div>
               </div>
 
-              {/* Badge Capitán */}
               <div>
                 <span style={{
                   backgroundColor: '#FFBF00',
@@ -134,6 +168,12 @@ const DashboardCapitan = () => {
                   Capitán
                 </span>
               </div>
+
+              {errorMsg && (
+                <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '11px', color: '#ff6b6b', margin: 0 }}>
+                  {errorMsg}
+                </p>
+              )}
             </div>
           </div>
 
@@ -144,7 +184,6 @@ const DashboardCapitan = () => {
             gap: '8px',
             minWidth: '150px',
           }}>
-            {/* Perfil */}
             <div style={{
               backgroundColor: 'rgba(0,0,0,0.25)',
               borderRadius: '12px',
@@ -152,7 +191,7 @@ const DashboardCapitan = () => {
               flex: 1,
             }}>
               <button
-                onClick={() => navigate('/perfil')}
+                onClick={() => navigate('/player-profile')}
                 style={{
                   backgroundColor: '#FFBF00',
                   border: 'none',
@@ -175,9 +214,8 @@ const DashboardCapitan = () => {
               </div>
             </div>
 
-            {/* Tus Estadísticas */}
             <button
-              onClick={() => navigate('/estadisticas')}
+              onClick={() => navigate('/historial')}
               style={{
                 backgroundColor: '#FFBF00',
                 border: 'none',
@@ -191,22 +229,15 @@ const DashboardCapitan = () => {
                 cursor: 'pointer',
               }}
             >
-              Tus Estadísticas
+              Mis Estadísticas
             </button>
           </div>
         </div>
 
         {/* Fila inferior */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: '10px',
-          flex: 1,
-          minHeight: 0,
-          overflow: 'hidden',
-        }}>
+        <div className="grid-2col" style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
 
-          {/* Buscar Jugadores */}
+          {/* Buscar Jugadores Disponibles */}
           <div style={{
             backgroundColor: 'rgba(0,0,0,0.25)',
             borderRadius: '12px',
@@ -236,24 +267,34 @@ const DashboardCapitan = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {mockPlayers.map((p) => (
+                  {availablePlayers.length === 0 ? (
+                    <tr>
+                      <td colSpan={4} style={{ ...tdStyle, textAlign: 'center', opacity: 0.5, padding: '20px' }}>
+                        No hay jugadores disponibles
+                      </td>
+                    </tr>
+                  ) : availablePlayers.map((p) => (
                     <tr key={p.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-                      <td style={tdStyle}>{p.name}</td>
-                      <td style={tdStyle}>{p.position}</td>
+                      <td style={tdStyle}>{p.fullname}</td>
+                      <td style={tdStyle}>{positionLabel[p.position] ?? p.position}</td>
                       <td style={{ ...tdStyle, textAlign: 'center' }}>{p.age}</td>
                       <td style={{ ...tdStyle, textAlign: 'center' }}>
-                        <button style={{
-                          backgroundColor: '#FFBF00',
-                          border: 'none',
-                          borderRadius: '6px',
-                          padding: '4px 12px',
-                          fontFamily: "'Montserrat', sans-serif",
-                          fontWeight: 'bold',
-                          fontSize: '11px',
-                          color: '#000',
-                          cursor: 'pointer',
-                        }}>
-                          Invitar
+                        <button
+                          onClick={() => handleInvitar(p)}
+                          disabled={invitingId === p.id || currentPlayers >= maxPlayers}
+                          style={{
+                            backgroundColor: invitingId === p.id ? 'rgba(255,191,0,0.5)' : '#FFBF00',
+                            border: 'none',
+                            borderRadius: '6px',
+                            padding: '4px 12px',
+                            fontFamily: "'Montserrat', sans-serif",
+                            fontWeight: 'bold',
+                            fontSize: '11px',
+                            color: '#000',
+                            cursor: invitingId === p.id || currentPlayers >= maxPlayers ? 'not-allowed' : 'pointer',
+                          }}
+                        >
+                          {invitingId === p.id ? '...' : 'Invitar'}
                         </button>
                       </td>
                     </tr>
@@ -279,32 +320,36 @@ const DashboardCapitan = () => {
               fontSize: '13px',
               color: '#000',
             }}>
-              Invitaciones Enviadas
+              Jugadores en el Equipo
             </div>
 
-            <div style={{ overflowY: 'auto', flex: 1, padding: '8px' }}>
-              {mockInvitations.map((inv, i) => (
-                <div
-                  key={i}
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    padding: '8px 10px',
-                    borderBottom: '1px solid rgba(255,255,255,0.08)',
-                  }}
-                >
-                  <div>
-                    <p style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 'bold', fontSize: '13px', color: '#fff', margin: 0 }}>
-                      {inv.name}
-                    </p>
-                    <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '11px', color: 'rgba(255,255,255,0.4)', margin: '2px 0 0 0' }}>
-                      {inv.date}
-                    </p>
-                  </div>
-                  <Badge status={inv.status} />
+            <div style={{ overflowY: 'auto', flex: 1 }}>
+              {teamPlayers.length === 0 ? (
+                <div style={{ padding: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+                  <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '12px', color: 'rgba(255,255,255,0.4)', textAlign: 'center' }}>
+                    Aún no hay jugadores en el equipo
+                  </p>
                 </div>
-              ))}
+              ) : (
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.2)', position: 'sticky', top: 0, backgroundColor: 'rgba(0,40,20,0.95)' }}>
+                      <th style={thStyle}>Nombre</th>
+                      <th style={thStyle}>Posición</th>
+                      <th style={{ ...thStyle, textAlign: 'center' }}>Edad</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {teamPlayers.map((p) => (
+                      <tr key={p.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+                        <td style={tdStyle}>{p.fullname}</td>
+                        <td style={tdStyle}>{positionLabel[p.position] ?? p.position}</td>
+                        <td style={{ ...tdStyle, textAlign: 'center' }}>{p.age}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </div>
           </div>
 

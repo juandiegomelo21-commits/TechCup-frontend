@@ -18,6 +18,8 @@ const OAuthCallbackPage = () => {
     localStorage.setItem('token', token);
     localStorage.setItem('email', email);
     localStorage.setItem('rol', rol);
+    const userId = params.get('userId');
+    if (userId) localStorage.setItem('userId', userId);
 
     switch (rol) {
       case 'organizador':
