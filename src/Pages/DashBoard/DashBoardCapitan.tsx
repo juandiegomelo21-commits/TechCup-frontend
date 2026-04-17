@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import DashboardLayout from '../../Components/layout/DashboardLayout';
 import { getPlayersApi, PlayerResponse } from '../../api/playerService';
-import { getTeamsApi } from '../../api/teamService';
+import { getTeamsApi, invitePlayerApi } from '../../api/teamService';
 
 const positionLabel: Record<string, string> = {
   GoalKeeper: 'Portero',
@@ -31,23 +31,56 @@ const tdStyle: React.CSSProperties = {
 const DashboardCapitan = () => {
   const navigate = useNavigate();
   const [availablePlayers, setAvailablePlayers] = useState<PlayerResponse[]>([]);
+  const [teamPlayers, setTeamPlayers] = useState<PlayerResponse[]>([]);
+  const [teamId, setTeamId] = useState<string | null>(null);
   const [currentPlayers, setCurrentPlayers] = useState(0);
+  const [invitingId, setInvitingId] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const maxPlayers = 20;
 
   useEffect(() => {
     const userId = localStorage.getItem('userId') ?? '';
-    getPlayersApi()
-      .then(data => setAvailablePlayers(data.filter(p => p.disponible && !p.haveTeam && p.id !== userId)))
-      .catch(() => setAvailablePlayers([]));
-    if (userId) {
-      getTeamsApi()
-        .then(teams => {
-          const myTeam = teams.find(t => t.players.includes(userId));
-          if (myTeam) setCurrentPlayers(myTeam.players.length);
-        })
-        .catch(() => {});
-    }
+
+    Promise.all([getPlayersApi(), getTeamsApi()])
+      .then(([allPlayers, teams]) => {
+        const myTeam = teams.find(t => t.captainId === userId);
+
+        if (myTeam) {
+          setTeamId(myTeam.id);
+          const inTeam = allPlayers.filter(p => myTeam.players.includes(p.id));
+          setTeamPlayers(inTeam);
+          setCurrentPlayers(inTeam.length);
+          const teamPlayerIds = new Set(myTeam.players);
+          setAvailablePlayers(
+            allPlayers.filter(p => p.disponible && !p.haveTeam && p.id !== userId && !teamPlayerIds.has(p.id))
+          );
+        } else {
+          setAvailablePlayers(
+            allPlayers.filter(p => p.disponible && !p.haveTeam && p.id !== userId)
+          );
+        }
+      })
+      .catch(() => {});
   }, []);
+
+  const handleInvitar = async (player: PlayerResponse) => {
+    if (!teamId) {
+      setErrorMsg('No tienes un equipo creado aún.');
+      return;
+    }
+    setInvitingId(player.id);
+    setErrorMsg(null);
+    try {
+      await invitePlayerApi(teamId, player.id);
+      setAvailablePlayers(prev => prev.filter(p => p.id !== player.id));
+      setTeamPlayers(prev => [...prev, player]);
+      setCurrentPlayers(prev => prev + 1);
+    } catch {
+      setErrorMsg(`No se pudo invitar a ${player.fullname}. Intenta de nuevo.`);
+    } finally {
+      setInvitingId(null);
+    }
+  };
 
   return (
     <DashboardLayout>
@@ -83,9 +116,7 @@ const DashboardCapitan = () => {
 
             <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
 
-              {/* Jugadores inscritos */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                {/* Icono escudo */}
                 <div style={{
                   width: '48px',
                   height: '48px',
@@ -110,7 +141,6 @@ const DashboardCapitan = () => {
                       {currentPlayers} / {maxPlayers}
                     </span>
                   </div>
-                  {/* Barra progreso */}
                   <div style={{ width: '100%', backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: '4px', height: '6px' }}>
                     <div style={{
                       width: `${(currentPlayers / maxPlayers) * 100}%`,
@@ -125,7 +155,6 @@ const DashboardCapitan = () => {
                 </div>
               </div>
 
-              {/* Badge Capitán */}
               <div>
                 <span style={{
                   backgroundColor: '#FFBF00',
@@ -139,6 +168,12 @@ const DashboardCapitan = () => {
                   Capitán
                 </span>
               </div>
+
+              {errorMsg && (
+                <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '11px', color: '#ff6b6b', margin: 0 }}>
+                  {errorMsg}
+                </p>
+              )}
             </div>
           </div>
 
@@ -149,7 +184,6 @@ const DashboardCapitan = () => {
             gap: '8px',
             minWidth: '150px',
           }}>
-            {/* Perfil */}
             <div style={{
               backgroundColor: 'rgba(0,0,0,0.25)',
               borderRadius: '12px',
@@ -180,7 +214,6 @@ const DashboardCapitan = () => {
               </div>
             </div>
 
-            {/* Mis Estadísticas */}
             <button
               onClick={() => navigate('/historial')}
               style={{
@@ -204,7 +237,7 @@ const DashboardCapitan = () => {
         {/* Fila inferior */}
         <div className="grid-2col" style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
 
-          {/* Buscar Jugadores */}
+          {/* Buscar Jugadores Disponibles */}
           <div style={{
             backgroundColor: 'rgba(0,0,0,0.25)',
             borderRadius: '12px',
@@ -246,12 +279,22 @@ const DashboardCapitan = () => {
                       <td style={tdStyle}>{positionLabel[p.position] ?? p.position}</td>
                       <td style={{ ...tdStyle, textAlign: 'center' }}>{p.age}</td>
                       <td style={{ ...tdStyle, textAlign: 'center' }}>
-                        <button style={{
-                          backgroundColor: '#FFBF00', border: 'none', borderRadius: '6px',
-                          padding: '4px 12px', fontFamily: "'Montserrat', sans-serif",
-                          fontWeight: 'bold', fontSize: '11px', color: '#000', cursor: 'pointer',
-                        }}>
-                          Invitar
+                        <button
+                          onClick={() => handleInvitar(p)}
+                          disabled={invitingId === p.id || currentPlayers >= maxPlayers}
+                          style={{
+                            backgroundColor: invitingId === p.id ? 'rgba(255,191,0,0.5)' : '#FFBF00',
+                            border: 'none',
+                            borderRadius: '6px',
+                            padding: '4px 12px',
+                            fontFamily: "'Montserrat', sans-serif",
+                            fontWeight: 'bold',
+                            fontSize: '11px',
+                            color: '#000',
+                            cursor: invitingId === p.id || currentPlayers >= maxPlayers ? 'not-allowed' : 'pointer',
+                          }}
+                        >
+                          {invitingId === p.id ? '...' : 'Invitar'}
                         </button>
                       </td>
                     </tr>
@@ -277,13 +320,36 @@ const DashboardCapitan = () => {
               fontSize: '13px',
               color: '#000',
             }}>
-              Invitaciones Enviadas
+              Jugadores en el Equipo
             </div>
 
-            <div style={{ overflowY: 'auto', flex: 1, padding: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '12px', color: 'rgba(255,255,255,0.4)', textAlign: 'center' }}>
-                Sin invitaciones enviadas aún
-              </p>
+            <div style={{ overflowY: 'auto', flex: 1 }}>
+              {teamPlayers.length === 0 ? (
+                <div style={{ padding: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+                  <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '12px', color: 'rgba(255,255,255,0.4)', textAlign: 'center' }}>
+                    Aún no hay jugadores en el equipo
+                  </p>
+                </div>
+              ) : (
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.2)', position: 'sticky', top: 0, backgroundColor: 'rgba(0,40,20,0.95)' }}>
+                      <th style={thStyle}>Nombre</th>
+                      <th style={thStyle}>Posición</th>
+                      <th style={{ ...thStyle, textAlign: 'center' }}>Edad</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {teamPlayers.map((p) => (
+                      <tr key={p.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+                        <td style={tdStyle}>{p.fullname}</td>
+                        <td style={tdStyle}>{positionLabel[p.position] ?? p.position}</td>
+                        <td style={{ ...tdStyle, textAlign: 'center' }}>{p.age}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </div>
           </div>
 
