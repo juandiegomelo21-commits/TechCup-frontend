@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start:back": "node scripts/start-backend.cjs",
+    "start": "npx concurrently --names \"BACK,FRONT\" --prefix-colors \"bgBlue.bold,bgGreen.bold\" \"npm run start:back\" \"npm run dev\""
   },
   "dependencies": {
     "@react-oauth/google": "^0.13.5",
