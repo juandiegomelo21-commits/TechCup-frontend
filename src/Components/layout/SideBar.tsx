@@ -97,12 +97,21 @@ const bottomItems: SidebarItem[] = [
   { label: 'Cerrar Sesión',        path: '/',         icon: <CerrarIcon /> },
 ];
 
+const getDashboardPath = () => {
+  const rol = localStorage.getItem('rol');
+  if (rol === 'capitan')      return '/dashboard/capitan';
+  if (rol === 'organizador')  return '/dashboard/org';
+  if (rol === 'arbitro')      return '/dashboard/arbitro';
+  return '/dashboard';
+};
+
 const Sidebar = ({ onClose, isMobile }: SidebarProps) => {
   const navigate = useNavigate();
   const location = useLocation();
 
   const handleNav = (path: string) => {
-    navigate(path);
+    const resolvedPath = path === '/dashboard' ? getDashboardPath() : path;
+    navigate(resolvedPath);
     if (isMobile && onClose) onClose();
   };
 

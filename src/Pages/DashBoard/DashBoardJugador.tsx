@@ -216,10 +216,21 @@ const DashboardJugador = () => {
       .finally(() => setLoadingStats(false));
   }, []);
 
-  const handleConfirmarCapitan = () => {
-    localStorage.setItem('rol', 'capitan');
-    setMostrarModal(false);
-    navigate('/dashboard/capitan');
+  const handleConfirmarCapitan = async () => {
+    const userId = localStorage.getItem('userId') ?? '';
+    try {
+      const res = await apiClient.patch(`/api/players/${userId}/capitan`);
+      const data = res.data as { token: string; rol: string };
+      const rol = data.rol.replace('ROLE_', '').toLowerCase();
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('rol', rol);
+    } catch {
+      // Si el backend falla, actualizamos solo localmente para esta sesión
+      localStorage.setItem('rol', 'capitan');
+    } finally {
+      setMostrarModal(false);
+      navigate('/dashboard/capitan');
+    }
   };
 
   return (
