@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import logo from '../assets/Logo.png';
 import fondoEstadio from '../assets/FondoEstadio.png';
 import { registerPlayerApi } from '../api/playerService';
+import { registerRefereeApi } from '../api/refereeService';
+import { registerOrganizadorApi } from '../api/organizadorService';
 
 type Role = 'jugador' | 'arbitro' | 'admin';
 type Affiliation = 'estudiante' | 'graduado' | 'familia';
@@ -191,6 +193,21 @@ const RegisterPage = () => {
             relativeId: parseInt(relativeId),
             relationship,
           }),
+        });
+      } else if (role === 'arbitro') {
+        await registerRefereeApi({
+          fullname: fullName,
+          email,
+          password,
+          license,
+          experience: parseInt(experience) || 0,
+        });
+      } else if (role === 'admin') {
+        await registerOrganizadorApi({
+          fullname: fullName,
+          email,
+          password,
+          authToken: token,
         });
       }
       navigate('/account-created');
