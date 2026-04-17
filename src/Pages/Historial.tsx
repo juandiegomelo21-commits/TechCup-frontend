@@ -206,7 +206,7 @@ function HistorialContent() {
         </div>
 
         {/* Two columns */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "16px" }}>
+        <div className="grid-2col" style={{ marginBottom: "16px" }}>
 
           {/* Equipos */}
           <div className="h-card">

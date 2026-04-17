@@ -232,7 +232,7 @@ const DashboardJugador = () => {
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', height: '100%', overflow: 'hidden' }}>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '10px' }}>
+        <div className="dash-top-row">
           <div style={{ backgroundColor: 'rgba(0,0,0,0.25)', borderRadius: '12px', overflow: 'hidden' }}>
             <div style={{
               backgroundColor: '#FFBF00', padding: '8px 16px',
@@ -240,7 +240,7 @@ const DashboardJugador = () => {
             }}>
               Estadísticas del Jugador — Torneo Actual
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', padding: '10px' }}>
+            <div className="grid-stats">
               {loadingStats ? (
                 <div style={{ gridColumn: '1/-1', textAlign: 'center', color: 'rgba(255,255,255,0.5)', padding: '20px', fontFamily: "'Inter', sans-serif", fontSize: '13px' }}>
                   Cargando estadísticas...

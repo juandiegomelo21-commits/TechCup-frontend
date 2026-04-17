@@ -135,7 +135,7 @@ const DashboardOrganizador = () => {
           }}>
             Accesos Rápidos
           </p>
-          <div style={{ display: 'flex', gap: '14px' }}>
+          <div className="grid-stats" style={{ padding: 0 }}>
             {accesos.map((item) => (
               <div
                 key={item.label}
@@ -183,12 +183,14 @@ const DashboardOrganizador = () => {
             Equipos Inscritos
           </p>
 
+          <div className="scroll-x" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
           {/* Cabecera tabla */}
           <div style={{
             display: 'grid',
             gridTemplateColumns: colWidths,
             padding: '8px 10px',
             borderBottom: '1px solid rgba(255,255,255,0.1)',
+            minWidth: '500px',
           }}>
             {['Escudo', 'Nombre del Equipo', 'Capitán', 'Jugadores', 'Acción'].map((col) => (
               <span key={col} style={{
@@ -204,7 +206,7 @@ const DashboardOrganizador = () => {
           </div>
 
           {/* Filas */}
-          <div style={{ overflowY: 'auto', flex: 1 }}>
+          <div style={{ overflowY: 'auto', flex: 1, minWidth: '500px' }}>
             {equipos.length === 0 ? (
               <p style={{ color: 'rgba(255,255,255,0.5)', fontFamily: "'Inter', sans-serif", fontSize: '13px', textAlign: 'center', padding: '24px' }}>
                 No hay equipos inscritos aún
@@ -261,6 +263,7 @@ const DashboardOrganizador = () => {
               );
             })}
           </div>
+          </div>{/* scroll-x */}
         </div>
 
       </div>

@@ -62,7 +62,7 @@ const PlayerProfilePage = () => {
       <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0, 60, 35, 0.35)', zIndex: 2 }} />
 
       {/* SIDEBAR */}
-      <div style={{ position: 'relative', zIndex: 10, width: '180px', minWidth: '180px', height: '100%', display: 'flex', flexDirection: 'column', padding: '20px 0' }}>
+      <div className="hide-mobile" style={{ position: 'relative', zIndex: 10, width: '180px', minWidth: '180px', height: '100%', display: 'flex', flexDirection: 'column', padding: '20px 0' }}>
         <img src={logo} alt="TechUp Fútbol" style={{ width: '90px', margin: '0 auto 28px auto', display: 'block' }} />
 
         <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '2px', padding: '0 12px' }}>
@@ -109,7 +109,7 @@ const PlayerProfilePage = () => {
       </div>
 
       {/* CONTENIDO */}
-      <div style={{ position: 'relative', zIndex: 10, flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px 30px 20px 10px' }}>
+      <div style={{ position: 'relative', zIndex: 10, flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 'clamp(12px, 3vw, 30px)' }}>
         <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', width: '100%', maxWidth: '480px', boxShadow: '0 10px 40px rgba(0,0,0,0.3)', overflow: 'hidden' }}>
 
           {/* Header amarillo */}

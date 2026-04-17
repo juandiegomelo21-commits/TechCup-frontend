@@ -120,10 +120,10 @@ const DashboardArbitro = () => {
         </div>
 
         {/* ── Fila: Estadísticas + Perfil ────────────────────────────── */}
-        <div style={{ display: 'flex', gap: '12px' }}>
+        <div className="dash-top-row" style={{ gap: '12px' }}>
           <div style={{ ...card, flex: 1 }}>
             <div style={{ backgroundColor: '#FFBF00', borderRadius: '8px', padding: '7px 0', textAlign: 'center', fontWeight: 800, fontSize: '13px', color: '#000', marginBottom: '12px' }}>Tus Estadísticas</div>
-            <div style={{ display: 'flex', gap: '10px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
               {[ { img: silbato, val: partidos.length, lab: 'Partidos Asignados' }, { img: tarjetaAmarilla, val: 0, lab: 'Tarjetas Amarillas' }, { img: tarjetaRoja, val: 0, lab: 'Tarjetas Rojas' } ].map((stat, i) => (
                 <div key={i} style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.25)', borderRadius: '10px', padding: '12px 8px 10px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', border: '1px solid rgba(255,255,255,0.08)' }}>
                   <img src={stat.img} style={{ width: '36px', height: '36px', objectFit: 'contain' }} alt="" />
@@ -158,12 +158,13 @@ const DashboardArbitro = () => {
         {/* ── Agenda de Encuentros Asignados ─────────────────────────── */}
         <div style={{ ...card, flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
           <p style={{ margin: '0 0 12px 0', fontSize: '14px', fontWeight: 700, color: '#ffffff' }}>Agenda de Encuentros Asignados</p>
-          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 120px 100px 140px', padding: '6px 12px', borderBottom: '1px solid rgba(255,255,255,0.1)', marginBottom: '4px' }}>
+          <div className="scroll-x" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 120px 100px 140px', padding: '6px 12px', borderBottom: '1px solid rgba(255,255,255,0.1)', marginBottom: '4px', minWidth: '480px' }}>
             {['Equipos Participantes', 'Fecha / Hora', 'Ubicación', 'Acción'].map(col => (
               <span key={col} style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase' }}>{col}</span>
             ))}
           </div>
-          <div style={{ overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          <div style={{ overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '4px', minWidth: '480px' }}>
             {partidos.length === 0 && (
               <p style={{ color: 'rgba(255,255,255,0.4)', fontFamily: "'Inter', sans-serif", fontSize: '13px', textAlign: 'center', padding: '24px 0' }}>
                 No tienes partidos asignados
@@ -186,6 +187,7 @@ const DashboardArbitro = () => {
               </div>
             ))}
           </div>
+          </div>{/* scroll-x */}
         </div>
 
         {/* ── MODAL: Acta Digital ────────────────────────────────────── */}

@@ -60,7 +60,7 @@ const DashboardCapitan = () => {
       }}>
 
         {/* Fila superior */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '10px' }}>
+        <div className="dash-top-row">
 
           {/* Resumen del Equipo */}
           <div style={{
@@ -202,14 +202,7 @@ const DashboardCapitan = () => {
         </div>
 
         {/* Fila inferior */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: '10px',
-          flex: 1,
-          minHeight: 0,
-          overflow: 'hidden',
-        }}>
+        <div className="grid-2col" style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
 
           {/* Buscar Jugadores */}
           <div style={{

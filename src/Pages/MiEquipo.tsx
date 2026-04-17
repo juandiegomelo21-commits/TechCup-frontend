@@ -186,7 +186,7 @@ const MiEquipo = () => {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', height: '100%', fontFamily: "'Inter', sans-serif" }}>
 
         {/* Fila superior: Mercado + Escudo */}
-        <div style={{ display: 'flex', gap: '14px' }}>
+        <div className="dash-top-row" style={{ gap: '14px' }}>
 
           {/* Mercado */}
           <div style={{ ...card, flex: 1, alignSelf: 'flex-start' }}>
@@ -254,11 +254,7 @@ const MiEquipo = () => {
           </div>
 
           <div style={{ display: 'flex', gap: '14px' }}>
-            <div style={{
-              flex: 1, display: 'grid',
-              gridTemplateColumns: 'repeat(3, 1fr)',
-              gap: '10px', alignContent: 'start',
-            }}>
+            <div className="grid-players" style={{ flex: 1, alignContent: 'start' }}>
               {jugadores.map(j => <JugadorCard key={j.id} jugador={j} />)}
             </div>
             <TuCard jugador={tuJugador} />

@@ -252,11 +252,7 @@ const PlayerSearchPage = () => {
         </div>
 
         {/* ── Grid jugadores ───────────────────────────────────────────────── */}
-        <div style={{
-          flex: 1, overflowY: 'auto',
-          display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: '10px', alignContent: 'start', paddingRight: '4px',
-        }}>
+        <div className="grid-players" style={{ flex: 1, overflowY: 'auto', alignContent: 'start', paddingRight: '4px' }}>
           {filtered.length === 0 ? (
             <div style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.4)', fontFamily: "'Inter', sans-serif", fontSize: '13px', padding: '60px', gap: '10px' }}>
               <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
