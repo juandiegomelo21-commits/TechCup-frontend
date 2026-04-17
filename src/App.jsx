@@ -22,6 +22,7 @@ import Torneo from './Pages/Torneos';
 import Pagos from './Pages/Pagos';
 import Historial from './Pages/Historial';
 import Reglas from './Pages/Reglas';
+import ProfileRouter from './Pages/ProfileRouter';
 
 function App() {
   return (
@@ -50,6 +51,7 @@ function App() {
         <Route path="/pagos" element={<Pagos />} />
         <Route path="/historial" element={<Historial />} />
         <Route path="/torneo/reglas" element={<Reglas />} />
+        <Route path="/perfil" element={<ProfileRouter />} />
       </Routes>
     </BrowserRouter>
   );

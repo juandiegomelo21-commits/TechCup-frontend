@@ -37,10 +37,14 @@ const LoginPage = () => {
     if (rol) {
       switch (rol) {
         case 'organizador':
+        case 'admin':
           navigate('/dashboard/org');
           break;
         case 'arbitro':
           navigate('/dashboard/arbitro');
+          break;
+        case 'capitan':
+          navigate('/dashboard/capitan');
           break;
         default:
           navigate('/dashboard');
