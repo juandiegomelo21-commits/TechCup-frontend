@@ -10,6 +10,14 @@ const IconUser = () => (
   </svg>
 );
 
+const IconId = () => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="2" y="5" width="20" height="14" rx="2" />
+    <circle cx="8" cy="12" r="2" />
+    <path d="M13 10h5M13 14h3" />
+  </svg>
+);
+
 const IconMail = () => (
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <rect x="2" y="4" width="20" height="16" rx="2" />
@@ -17,10 +25,16 @@ const IconMail = () => (
   </svg>
 );
 
-const IconCalendar = () => (
+const IconClock = () => (
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" />
-    <line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
+    <circle cx="12" cy="12" r="9" />
+    <path d="M12 7v5l3 3" />
+  </svg>
+);
+
+const IconEdit = () => (
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
   </svg>
 );
 
@@ -73,6 +87,9 @@ const RefereeProfilePage = () => {
                 </span>
               </div>
             </div>
+            <button style={{ display: 'flex', alignItems: 'center', gap: '5px', backgroundColor: 'rgba(255,255,255,0.5)', border: '1px solid rgba(0,0,0,0.15)', borderRadius: '6px', padding: '5px 10px', fontSize: '11px', fontFamily: "'Inter', sans-serif", cursor: 'pointer', color: '#1a1a1a', fontWeight: 500 }}>
+              <IconEdit /> Editar Perfil
+            </button>
           </div>
 
           {/* Cuerpo */}
@@ -82,9 +99,17 @@ const RefereeProfilePage = () => {
               Información Personal
             </p>
 
-            <div style={{ marginBottom: '10px' }}>
-              <p style={{ margin: '0 0 2px 0', fontSize: '9px', color: '#999', fontFamily: "'Inter', sans-serif", textTransform: 'uppercase', letterSpacing: '0.05em' }}>NOMBRE COMPLETO</p>
-              <p style={{ margin: 0, fontSize: '12px', color: '#333', fontFamily: "'Inter', sans-serif" }}>{referee.fullname}</p>
+            <div style={{ display: 'flex', gap: '12px', marginBottom: '10px' }}>
+              <div style={{ flex: 1 }}>
+                <p style={{ margin: '0 0 2px 0', fontSize: '9px', color: '#999', fontFamily: "'Inter', sans-serif", textTransform: 'uppercase', letterSpacing: '0.05em' }}>NOMBRE COMPLETO</p>
+                <p style={{ margin: 0, fontSize: '12px', color: '#333', fontFamily: "'Inter', sans-serif" }}>{referee.fullname}</p>
+              </div>
+              <div style={{ flex: 1 }}>
+                <p style={{ margin: '0 0 2px 0', fontSize: '9px', color: '#999', fontFamily: "'Inter', sans-serif", textTransform: 'uppercase', letterSpacing: '0.05em' }}>ID</p>
+                <p style={{ margin: 0, fontSize: '12px', color: '#333', fontFamily: "'Inter', sans-serif", display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  <IconId /> {referee.id}
+                </p>
+              </div>
             </div>
 
             <div style={{ marginBottom: '16px' }}>
@@ -97,30 +122,23 @@ const RefereeProfilePage = () => {
             <div style={{ height: '1px', backgroundColor: '#eee', margin: '0 0 14px 0' }} />
 
             <p style={{ margin: '0 0 10px 0', fontFamily: "'Inter', sans-serif", fontSize: '12px', fontWeight: 700, color: '#555' }}>
-              Agenda de Partidos
+              Credenciales de Árbitro
             </p>
 
-            {partidos === 0 ? (
-              <p style={{ fontSize: '12px', color: '#999', fontFamily: "'Inter', sans-serif", marginBottom: '16px' }}>
-                Sin partidos asignados aún.
-              </p>
-            ) : (
-              <div style={{ marginBottom: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {referee.assignedMatches.slice(0, 3).map(m => (
-                  <div key={m.matchId} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 10px', background: '#f9f9f9', borderRadius: '8px', border: '1px solid #eee' }}>
-                    <IconCalendar />
-                    <div style={{ flex: 1 }}>
-                      <p style={{ margin: 0, fontSize: '11px', fontWeight: 600, color: '#333', fontFamily: "'Inter', sans-serif" }}>
-                        {m.localTeamName} vs {m.visitorTeamName}
-                      </p>
-                      <p style={{ margin: 0, fontSize: '10px', color: '#888', fontFamily: "'Inter', sans-serif" }}>
-                        {m.field} · {new Date(m.dateTime).toLocaleDateString('es-CO', { day: '2-digit', month: 'short' })}
-                      </p>
-                    </div>
-                  </div>
-                ))}
+            <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
+              <div style={{ flex: 1 }}>
+                <p style={{ margin: '0 0 2px 0', fontSize: '9px', color: '#999', fontFamily: "'Inter', sans-serif", textTransform: 'uppercase', letterSpacing: '0.05em' }}>PARTIDOS ASIGNADOS</p>
+                <p style={{ margin: 0, fontSize: '12px', color: '#333', fontFamily: "'Inter', sans-serif", display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  <IconId /> {partidos}
+                </p>
               </div>
-            )}
+              <div style={{ flex: 1 }}>
+                <p style={{ margin: '0 0 2px 0', fontSize: '9px', color: '#999', fontFamily: "'Inter', sans-serif", textTransform: 'uppercase', letterSpacing: '0.05em' }}>PRÓXIMO PARTIDO</p>
+                <p style={{ margin: 0, fontSize: '12px', color: '#333', fontFamily: "'Inter', sans-serif", display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  <IconClock /> {partidos > 0 ? new Date(referee.assignedMatches[0].dateTime).toLocaleDateString('es-CO', { day: '2-digit', month: 'short' }) : 'Sin asignar'}
+                </p>
+              </div>
+            </div>
 
             <div style={{ display: 'flex', gap: '8px' }}>
               <div style={{ flex: 1, padding: '10px 8px', backgroundColor: '#4CAF50', borderRadius: '8px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
@@ -129,7 +147,11 @@ const RefereeProfilePage = () => {
               </div>
               <div style={{ flex: 1, padding: '10px 8px', backgroundColor: '#F5C518', borderRadius: '8px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
                 <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '12px', fontWeight: 700, color: '#1a1a1a' }}>{partidos}</span>
-                <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '9px', color: '#555' }}>Partidos Asignados</span>
+                <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '9px', color: '#555' }}>Partidos Arbitrados</span>
+              </div>
+              <div style={{ flex: 1, padding: '10px 8px', backgroundColor: '#4FC3F7', borderRadius: '8px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
+                <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '12px', fontWeight: 700, color: '#0D47A1' }}>Certificado</span>
+                <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '9px', color: '#0D47A1' }}>Licencia</span>
               </div>
             </div>
 
