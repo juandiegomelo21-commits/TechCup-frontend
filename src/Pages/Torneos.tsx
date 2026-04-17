@@ -222,14 +222,16 @@ const Torneo = () => {
 
         {/* Botones */}
         <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', paddingBottom: '10px' }}>
-          <button
-            onClick={() => navigate('/torneo/crear')}
-            style={OVAL_BUTTON_STYLE}
-            onMouseOver={e => (e.currentTarget.style.opacity = '0.9')}
-            onMouseOut={e => (e.currentTarget.style.opacity = '1')}
-          >
-            Inscribir Nuevo Torneo
-          </button>
+          {localStorage.getItem('rol') === 'organizador' && (
+            <button
+              onClick={() => navigate('/torneo/crear')}
+              style={OVAL_BUTTON_STYLE}
+              onMouseOver={e => (e.currentTarget.style.opacity = '0.9')}
+              onMouseOut={e => (e.currentTarget.style.opacity = '1')}
+            >
+              Inscribir Nuevo Torneo
+            </button>
+          )}
           <button
             onClick={() => navigate('/historial')}
             style={OVAL_BUTTON_STYLE}
