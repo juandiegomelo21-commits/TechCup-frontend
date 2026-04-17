@@ -12,6 +12,7 @@ import ForgotPasswordPage from './Pages/ForgotPasswordPage';
 import PlayerProfilePage from './Pages/PlayerProfilePage';
 import PlayerSearchPage from './Pages/PlayerSearchPage';
 import MiEquipo from './Pages/MiEquipo';
+import CrearEquipo from './Pages/CrearEquipo';
 import PizarraTactica from './Pages/PizarraTactica';
 import OAuthCallbackPage from './Pages/OAuthCallbackPage';
 import CreateTournamentPage from './Pages/CreateTournamentPage';
@@ -42,6 +43,7 @@ function App() {
         <Route path="/dashboard/org" element={<DashboardOrganizador />} />
         <Route path="/dashboard/arbitro" element={<DashboardArbitro />} />
         <Route path="/equipo" element={<MiEquipo />} />
+        <Route path="/equipo/crear" element={<CrearEquipo />} />
         <Route path="/equipo/pizarra" element={<PizarraTactica />} />
         <Route path="/oauth2/callback" element={<OAuthCallbackPage />} />
         <Route path="/referee-profile" element={<RefereeProfilePage />} />
