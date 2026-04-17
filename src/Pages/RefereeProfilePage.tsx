@@ -44,8 +44,12 @@ const RefereeProfilePage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const email = localStorage.getItem('email');
-    if (!email) { navigate('/login'); return; }
+    const token = localStorage.getItem('token');
+    if (!token) { navigate('/login'); return; }
+
+    const email = localStorage.getItem('email') ?? '';
+    if (!email) { setLoading(false); return; }
+
     getRefereeByEmailApi(email)
       .then(data => setReferee(data))
       .catch(() => {})
