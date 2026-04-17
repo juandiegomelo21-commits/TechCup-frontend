@@ -83,12 +83,11 @@ const CloseDrawerIcon = () => (
   </svg>
 );
 
-const mainItems: SidebarItem[] = [
-  { label: 'Panel Principal', path: '/dashboard', icon: <PanelIcon /> },
-  { label: 'Mi Equipo',       path: '/equipo',    icon: <EquipoIcon /> },
-  { label: 'Torneo',          path: '/torneo',    icon: <TorneoIcon /> },
-  { label: 'Pagos',           path: '/pagos',     icon: <PagosIcon /> },
-  { label: 'Historial',       path: '/historial', icon: <HistorialIcon /> },
+const staticItems: SidebarItem[] = [
+  { label: 'Mi Equipo',  path: '/equipo',    icon: <EquipoIcon /> },
+  { label: 'Torneo',     path: '/torneo',    icon: <TorneoIcon /> },
+  { label: 'Pagos',      path: '/pagos',     icon: <PagosIcon /> },
+  { label: 'Historial',  path: '/historial', icon: <HistorialIcon /> },
 ];
 
 const bottomItems: SidebarItem[] = [
@@ -100,6 +99,22 @@ const bottomItems: SidebarItem[] = [
 const Sidebar = ({ onClose, isMobile }: SidebarProps) => {
   const navigate = useNavigate();
   const location = useLocation();
+
+  const dashboardPath = (() => {
+    const rol = localStorage.getItem('rol');
+    switch (rol) {
+      case 'organizador':
+      case 'admin':   return '/dashboard/org';
+      case 'arbitro': return '/dashboard/arbitro';
+      case 'capitan': return '/dashboard/capitan';
+      default:        return '/dashboard';
+    }
+  })();
+
+  const mainItems: SidebarItem[] = [
+    { label: 'Panel Principal', path: dashboardPath, icon: <PanelIcon /> },
+    ...staticItems,
+  ];
 
   const handleNav = (path: string) => {
     navigate(path);
