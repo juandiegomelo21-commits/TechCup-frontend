@@ -21,6 +21,7 @@ import TournamentDetailPage from './Pages/TournamentDetailPage';
 import Torneo from './Pages/Torneos';
 import Pagos from './Pages/Pagos';
 import Historial from './Pages/Historial';
+import Reglas from './Pages/Reglas';
 
 function App() {
   return (
@@ -48,6 +49,7 @@ function App() {
         <Route path="/torneo/:id" element={<TournamentDetailPage />} />
         <Route path="/pagos" element={<Pagos />} />
         <Route path="/historial" element={<Historial />} />
+        <Route path="/torneo/reglas" element={<Reglas />} />
       </Routes>
     </BrowserRouter>
   );
