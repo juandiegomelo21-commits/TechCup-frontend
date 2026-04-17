@@ -99,32 +99,41 @@ const ErrorState = ({ onRetry }: { onRetry: () => void }) => (
   </div>
 );
 
-const SinEquipoState = ({ onCrear }: { onCrear: () => void }) => (
-  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-    <div style={{
-      textAlign: 'center', backgroundColor: 'rgba(255,255,255,0.08)',
-      borderRadius: '16px', padding: '48px 40px',
-      border: '1px solid rgba(255,255,255,0.13)', maxWidth: '380px',
-    }}>
-      <svg width="64" height="64" viewBox="0 0 64 64" fill="none" style={{ margin: '0 auto 16px', display: 'block' }}>
-        <circle cx="32" cy="32" r="30" stroke="rgba(255,255,255,0.2)" strokeWidth="2"/>
-        <circle cx="32" cy="32" r="10" stroke="#FFBF00" strokeWidth="2"/>
-        <path d="M32 2v10M32 52v10M2 32h10M52 32h10" stroke="rgba(255,255,255,0.3)" strokeWidth="2" strokeLinecap="round"/>
-      </svg>
-      <p style={{ color: '#fff', fontFamily: "'Montserrat', sans-serif", fontWeight: 700, fontSize: '18px', margin: '0 0 8px' }}>
-        Aún no tienes equipo
-      </p>
-      <p style={{ color: 'rgba(255,255,255,0.6)', fontFamily: "'Inter', sans-serif", fontSize: '13px', margin: '0 0 24px', lineHeight: '1.5' }}>
-        Crea tu equipo, agrega jugadores y participa en el torneo.
-      </p>
-      <button onClick={onCrear} style={{
-        backgroundColor: '#FFBF00', color: '#000', border: 'none',
-        borderRadius: '25px', padding: '12px 32px', fontSize: '14px',
-        fontWeight: 700, cursor: 'pointer', fontFamily: "'Montserrat', sans-serif",
-      }}>Crear mi equipo</button>
+const SinEquipoState = ({ onCrear }: { onCrear: () => void }) => {
+  const rol = localStorage.getItem('rol');
+  const puedeCrear = rol === 'capitan' || rol === 'organizador';
+
+  return (
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+      <div style={{
+        textAlign: 'center', backgroundColor: 'rgba(255,255,255,0.08)',
+        borderRadius: '16px', padding: '48px 40px',
+        border: '1px solid rgba(255,255,255,0.13)', maxWidth: '380px',
+      }}>
+        <svg width="64" height="64" viewBox="0 0 64 64" fill="none" style={{ margin: '0 auto 16px', display: 'block' }}>
+          <circle cx="32" cy="32" r="30" stroke="rgba(255,255,255,0.2)" strokeWidth="2"/>
+          <circle cx="32" cy="32" r="10" stroke="#FFBF00" strokeWidth="2"/>
+          <path d="M32 2v10M32 52v10M2 32h10M52 32h10" stroke="rgba(255,255,255,0.3)" strokeWidth="2" strokeLinecap="round"/>
+        </svg>
+        <p style={{ color: '#fff', fontFamily: "'Montserrat', sans-serif", fontWeight: 700, fontSize: '18px', margin: '0 0 8px' }}>
+          Aún no tienes equipo
+        </p>
+        <p style={{ color: 'rgba(255,255,255,0.6)', fontFamily: "'Inter', sans-serif", fontSize: '13px', margin: '0 0 24px', lineHeight: '1.5' }}>
+          {puedeCrear
+            ? 'Crea tu equipo, agrega jugadores y participa en el torneo.'
+            : 'Espera a que un capitán te agregue a su equipo, o busca equipos disponibles en el mercado.'}
+        </p>
+        {puedeCrear && (
+          <button onClick={onCrear} style={{
+            backgroundColor: '#FFBF00', color: '#000', border: 'none',
+            borderRadius: '25px', padding: '12px 32px', fontSize: '14px',
+            fontWeight: 700, cursor: 'pointer', fontFamily: "'Montserrat', sans-serif",
+          }}>Crear mi equipo</button>
+        )}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const MiEquipo = () => {
   const navigate = useNavigate();
