@@ -180,7 +180,7 @@ const RegisterPage = () => {
           numberID: parseInt(cedula),
           position,
           dorsalNumber: parseInt(jerseyNumber) || 0,
-          photoUrl: photoBase64 || null,
+          photoUrl: null,
           haveTeam: false,
           age: parseInt(age),
           gender,
