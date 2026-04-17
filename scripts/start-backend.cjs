@@ -3,7 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const os = require('os');
 
-const backendDir = path.resolve(__dirname, '..', '../Tech-Up-Futbol-BackEndFINALISIMA');
+const backendDir = path.resolve(__dirname, '../../..', 'Tech-Up-Futbol-BackEndFINALISIMA');
 
 if (!fs.existsSync(backendDir)) {
   console.warn('\n[BACK] ⚠️  Backend no encontrado — arrancando solo el frontend.');
