@@ -31,3 +31,10 @@ export const getRefereeByIdApi = async (id: string): Promise<RefereeResponse> =>
   const response = await apiClient.get<RefereeResponse>(`/api/referees/${id}`);
   return response.data;
 };
+
+export const getRefereeByEmailApi = async (email: string): Promise<RefereeResponse> => {
+  const all = await apiClient.get<RefereeResponse[]>('/api/referees');
+  const found = all.data.find(r => r.email.toLowerCase() === email.toLowerCase());
+  if (!found) throw new Error('Árbitro no encontrado');
+  return found;
+};

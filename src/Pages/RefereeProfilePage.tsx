@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../Components/layout/DashboardLayout';
-import { getRefereeByIdApi, RefereeResponse } from '../api/refereeService';
+import { getRefereeByEmailApi, RefereeResponse } from '../api/refereeService';
 
 const IconUser = () => (
   <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="rgba(100,70,0,0.65)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -44,12 +44,12 @@ const RefereeProfilePage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const userId = localStorage.getItem('userId');
-    if (!userId) { navigate('/login'); return; }
+    const email = localStorage.getItem('email');
+    if (!email) { navigate('/login'); return; }
 
-    getRefereeByIdApi(userId)
+    getRefereeByEmailApi(email)
       .then(data => setReferee(data))
-      .catch(() => navigate('/login'))
+      .catch(() => setLoading(false))
       .finally(() => setLoading(false));
   }, [navigate]);
 
