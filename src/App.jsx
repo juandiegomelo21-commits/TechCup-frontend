@@ -11,11 +11,16 @@ import EmailSentPage from './Pages/EmailSentPage';
 import ForgotPasswordPage from './Pages/ForgotPasswordPage';
 import PlayerProfilePage from './Pages/PlayerProfilePage';
 import PlayerSearchPage from './Pages/PlayerSearchPage';
-import CreateTournamentPage from './Pages/CreateTournamentPage';
-import TournamentDetailPage from './Pages/TournamentDetailPage';
 import MiEquipo from './Pages/MiEquipo';
 import PizarraTactica from './Pages/PizarraTactica';
 import OAuthCallbackPage from './Pages/OAuthCallbackPage';
+import CreateTournamentPage from './Pages/CreateTournamentPage';
+import TournamentDetailPage from './Pages/TournamentDetailPage';
+import RefereeProfilePage from './Pages/RefereeProfilePage';
+import AdminProfilePage from './Pages/AdminProfilePage';
+import Torneo from './Pages/Torneos';
+import Pagos from './Pages/Pagos';
+import Historial from './Pages/Historial';
 import ProtectedRoute from './Components/ProtectedRoute';
 
 function App() {
@@ -42,9 +47,15 @@ function App() {
             <PlayerProfilePage />
           </ProtectedRoute>
         } />
-        <Route path="/player-search" element={
+        <Route path="/mercado" element={
           <ProtectedRoute roles={['jugador', 'capitan']}>
             <PlayerSearchPage />
+          </ProtectedRoute>
+        } />
+
+        <Route path="/historial" element={
+          <ProtectedRoute roles={['jugador', 'capitan']}>
+            <Historial />
           </ProtectedRoute>
         } />
 
@@ -71,6 +82,11 @@ function App() {
             <DashboardArbitro />
           </ProtectedRoute>
         } />
+        <Route path="/referee-profile" element={
+          <ProtectedRoute roles={['arbitro']}>
+            <RefereeProfilePage />
+          </ProtectedRoute>
+        } />
 
         {/* Organizador */}
         <Route path="/dashboard/org" element={
@@ -78,7 +94,7 @@ function App() {
             <DashboardOrganizador />
           </ProtectedRoute>
         } />
-        <Route path="/create-tournament" element={
+        <Route path="/torneo/crear" element={
           <ProtectedRoute roles={['organizador']}>
             <CreateTournamentPage />
           </ProtectedRoute>
@@ -86,6 +102,23 @@ function App() {
         <Route path="/torneo/:id" element={
           <ProtectedRoute roles={['organizador']}>
             <TournamentDetailPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/torneo" element={
+          <ProtectedRoute roles={['organizador']}>
+            <Torneo />
+          </ProtectedRoute>
+        } />
+        <Route path="/pagos" element={
+          <ProtectedRoute roles={['capitan']}>
+            <Pagos />
+          </ProtectedRoute>
+        } />
+
+        {/* Admin */}
+        <Route path="/admin-profile" element={
+          <ProtectedRoute roles={['admin']}>
+            <AdminProfilePage />
           </ProtectedRoute>
         } />
       </Routes>

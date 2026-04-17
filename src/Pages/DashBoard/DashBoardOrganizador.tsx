@@ -169,8 +169,8 @@ const DashboardOrganizador = () => {
 
             {/* Crear Torneo — siempre disponible */}
             {[
-              { label: 'Crear Torneo', icon: <IconCrearTorneo />, onClick: () => navigate('/create-tournament') },
-              { label: 'Configurar Reglas', icon: <IconConfigurarReglas />, onClick: () => navigate('/create-tournament') },
+              { label: 'Crear Torneo', icon: <IconCrearTorneo />, onClick: () => navigate('/torneo/crear') },
+              { label: 'Configurar Reglas', icon: <IconConfigurarReglas />, onClick: () => navigate('/torneo/crear') },
             ].map(item => (
               <div key={item.label} onClick={item.onClick}
                 style={{ flex: 1, backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: '12px', padding: '20px 10px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', cursor: 'pointer', border: '1px solid rgba(255,255,255,0.08)' }}
@@ -264,7 +264,7 @@ const DashboardOrganizador = () => {
             <p style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: '#ffffff', fontFamily: "'Montserrat', sans-serif" }}>
               Torneos
             </p>
-            <button onClick={() => navigate('/create-tournament')} style={{ backgroundColor: '#FFBF00', color: '#000', border: 'none', borderRadius: '20px', padding: '6px 16px', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>
+            <button onClick={() => navigate('/torneo/crear')} style={{ backgroundColor: '#FFBF00', color: '#000', border: 'none', borderRadius: '20px', padding: '6px 16px', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}>
               + Nuevo
             </button>
           </div>

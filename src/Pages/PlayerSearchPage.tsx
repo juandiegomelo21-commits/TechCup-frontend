@@ -1,24 +1,36 @@
-import { useEffect, useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import logo from '../assets/Logo.png';
-import campoFutbol from '../assets/campoFutbol.png';
-import { searchPlayersApi, type PlayerSearchResult } from '../api/playerService';
+import { useState } from 'react';
+import DashboardLayout from '../Components/layout/DashboardLayout';
 
-// Mapeo posición backend → display
-const posicionDisplay: Record<string, string> = {
-  GoalKeeper: 'Portero',
-  Defender: 'Defensa',
-  Midfielder: 'Mediocampista',
-  Winger: 'Extremo',
-};
+interface Player {
+  id: number;
+  name: string;
+  username: string;
+  edad: number;
+  posicion: string;
+  sexo: string;
+  semestre: number;
+}
 
-// Opciones del filtro (valor enviado al backend)
-const posicionesOpciones = [
-  { backend: 'GoalKeeper', label: 'Portero' },
-  { backend: 'Defender', label: 'Defensa' },
-  { backend: 'Midfielder', label: 'Mediocampista' },
-  { backend: 'Winger', label: 'Extremo' },
+const mockPlayers: Player[] = [
+  { id: 1,  name: 'Vanessa Torres',   username: '', edad: 20, posicion: 'Delantero',    sexo: 'F', semestre: 3 },
+  { id: 2,  name: 'Daniel Pinilla',   username: '', edad: 22, posicion: 'Defensa',       sexo: 'M', semestre: 5 },
+  { id: 3,  name: 'Shadday Correa',   username: '', edad: 19, posicion: 'Mediocampista', sexo: 'M', semestre: 2 },
+  { id: 4,  name: 'Nicolas Sanchez',  username: '', edad: 23, posicion: 'Portero',       sexo: 'M', semestre: 7 },
+  { id: 5,  name: 'Maria Jose Perez', username: '', edad: 19, posicion: 'Mediocampista', sexo: 'F', semestre: 2 },
+  { id: 6,  name: 'Adrian Ducuara',   username: '', edad: 23, posicion: 'Portero',       sexo: 'M', semestre: 7 },
+  { id: 7,  name: 'Juan David Mejia', username: '', edad: 21, posicion: 'Defensa',       sexo: 'M', semestre: 4 },
+  { id: 8,  name: 'Andres Pineda',    username: '', edad: 24, posicion: 'Delantero',     sexo: 'M', semestre: 6 },
+  { id: 9,  name: 'Mariana Malagon',  username: '', edad: 20, posicion: 'Mediocampista', sexo: 'F', semestre: 3 },
+  { id: 10, name: 'Andres Cantor',    username: '', edad: 22, posicion: 'Defensa',       sexo: 'M', semestre: 5 },
+  { id: 11, name: 'Rodrigo Martinez', username: '', edad: 20, posicion: 'Mediocampista', sexo: 'M', semestre: 3 },
+  { id: 12, name: 'Javier Romero',    username: '', edad: 22, posicion: 'Defensa',       sexo: 'M', semestre: 5 },
+  { id: 13, name: 'Juan Tellez',      username: '', edad: 20, posicion: 'Mediocampista', sexo: 'M', semestre: 3 },
+  { id: 14, name: 'Ronaldo Mejia',    username: '', edad: 22, posicion: 'Defensa',       sexo: 'M', semestre: 5 },
+  { id: 15, name: 'David Cajamarca',  username: '', edad: 20, posicion: 'Mediocampista', sexo: 'M', semestre: 3 },
+  { id: 16, name: 'Juan Diego Melo',  username: '', edad: 22, posicion: 'Defensa',       sexo: 'M', semestre: 5 },
 ];
+
+const posiciones = ['Delantero', 'Mediocampista', 'Defensa', 'Portero'];
 
 interface Filters {
   edad: string;
@@ -27,218 +39,282 @@ interface Filters {
   sexo: string;
 }
 
+const colPosicion: Record<string, string> = {
+  Portero:       '#E8A020',
+  Defensa:       '#1565C0',
+  Mediocampista: '#2E7D32',
+  Delantero:     '#C62828',
+};
+
 const PlayerSearchPage = () => {
-  const navigate = useNavigate();
+  const rol = localStorage.getItem('rol');
+  const esCapitan = rol === 'capitan';
 
   const [search, setSearch] = useState('');
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [openSection, setOpenSection] = useState<string | null>(null);
   const [filters, setFilters] = useState<Filters>({ edad: '', semestre: '', posicion: '', sexo: '' });
-  const [players, setPlayers] = useState<PlayerSearchResult[]>([]);
-  const [loading, setLoading] = useState(false);
 
-  const fetchPlayers = useCallback(async () => {
-    setLoading(true);
-    try {
-      const params: Record<string, any> = {};
-      if (search) params.name = search;
-      if (filters.posicion) params.position = filters.posicion;
-      if (filters.semestre) params.semester = parseInt(filters.semestre);
-      if (filters.edad) { params.minAge = parseInt(filters.edad); params.maxAge = parseInt(filters.edad); }
-      if (filters.sexo) params.gender = filters.sexo === 'M' ? 'Masculino' : 'Femenino';
-      const result = await searchPlayersApi(params);
-      setPlayers(result);
-    } catch {
-      setPlayers([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [search, filters]);
+  const toggleSection = (s: string) => setOpenSection(p => p === s ? null : s);
+  const setFilter = (key: keyof Filters, value: string) =>
+    setFilters(p => ({ ...p, [key]: p[key] === value ? '' : value }));
 
-  useEffect(() => { fetchPlayers(); }, [fetchPlayers]);
+  const filtered = mockPlayers.filter(p => {
+    const matchSearch   = search === '' || p.name.toLowerCase().includes(search.toLowerCase());
+    const matchEdad     = filters.edad === ''     || p.edad === Number(filters.edad);
+    const matchSemestre = filters.semestre === '' || p.semestre === Number(filters.semestre);
+    const matchPosicion = filters.posicion === '' || p.posicion === filters.posicion;
+    const matchSexo     = filters.sexo === ''     || p.sexo === filters.sexo;
+    return matchSearch && matchEdad && matchSemestre && matchPosicion && matchSexo;
+  });
 
-  const toggleSection = (section: string) => setOpenSection(prev => prev === section ? null : section);
-  const setFilter = (key: keyof Filters, value: string) => setFilters(prev => ({ ...prev, [key]: prev[key] === value ? '' : value }));
   const activeFiltersCount = Object.values(filters).filter(Boolean).length;
 
   return (
-    <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden', display: 'flex' }}>
-      <div style={{ position: 'absolute', inset: 0, backgroundColor: '#00674F', zIndex: 0 }} />
-      <img src={campoFutbol} alt="" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.22, zIndex: 1 }} />
-      <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,60,35,0.35)', zIndex: 2 }} />
+    <DashboardLayout>
+      <div
+        style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '14px', fontFamily: "'Inter', sans-serif" }}
+        onClick={() => { setFiltersOpen(false); setOpenSection(null); }}
+      >
 
-      {/* SIDEBAR */}
-      <div style={{ position: 'relative', zIndex: 10, width: '170px', minWidth: '170px', height: '100%', display: 'flex', flexDirection: 'column', padding: '20px 0' }}>
-        <img src={logo} alt="TechUp Fútbol" style={{ width: '85px', margin: '0 auto 28px auto', display: 'block' }} />
-        <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '2px', padding: '0 10px' }}>
-          {[
-            { label: 'Panel Principal', icon: '▦', path: '/dashboard' },
-            { label: 'Mi Equipo', icon: '👥', path: '/equipo' },
-            { label: 'Pagos', icon: '💳', path: '/pagos' },
-            { label: 'Mercado', icon: '🛒', path: '/player-search', active: true },
-            { label: 'Historial', icon: '📋', path: '/historial' },
-          ].map((item) => (
-            <button key={item.label} onClick={() => item.path && navigate(item.path)} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 10px', borderRadius: '8px', border: 'none', background: item.active ? 'rgba(255,255,255,0.18)' : 'transparent', color: '#ffffff', fontFamily: "'Inter', sans-serif", fontSize: '12px', cursor: 'pointer', textAlign: 'left', width: '100%' }}>
-              <span>{item.icon}</span>{item.label}
-            </button>
-          ))}
-        </nav>
-        <div style={{ padding: '0 10px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
-          {[
-            { label: 'Preguntas Frecuentes', icon: '❓' },
-            { label: 'Aprender', icon: '📖' },
-            { label: 'Cerrar Sesión', icon: '🚪', onClick: () => { localStorage.clear(); navigate('/login'); } },
-          ].map((item) => (
-            <button key={item.label} onClick={(item as any).onClick} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 10px', borderRadius: '8px', border: 'none', background: 'transparent', color: '#ffffff', fontFamily: "'Inter', sans-serif", fontSize: '12px', cursor: 'pointer', textAlign: 'left', width: '100%', opacity: 0.85 }}>
-              <span>{item.icon}</span>{item.label}
-            </button>
-          ))}
+        {/* ── Header ──────────────────────────────────────────────────────── */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingLeft: '16px' }}>
+          <div>
+            <h1 style={{ margin: 0, fontSize: '22px', fontWeight: 800, color: '#fff', fontFamily: "'Montserrat', sans-serif" }}>
+              Mercado de Jugadores
+            </h1>
+            <p style={{ margin: '2px 0 0', fontSize: '12px', color: 'rgba(255,255,255,0.5)' }}>
+              Busca y ficha jugadores para tu equipo
+            </p>
+          </div>
+          <span style={{
+            backgroundColor: '#FFBF00', color: '#000',
+            fontSize: '11px', fontWeight: 700,
+            padding: '4px 14px', borderRadius: '20px',
+            letterSpacing: '0.5px', textTransform: 'uppercase',
+          }}>
+            {filtered.length} jugadores
+          </span>
         </div>
-      </div>
 
-      {/* CONTENIDO */}
-      <div style={{ position: 'relative', zIndex: 10, flex: 1, display: 'flex', flexDirection: 'column', padding: '20px 24px 20px 10px', overflow: 'hidden' }}>
-        <div style={{ backgroundColor: 'rgba(255,255,255,0.92)', borderRadius: '14px', flex: 1, display: 'flex', flexDirection: 'column', padding: '16px', overflow: 'hidden', boxShadow: '0 10px 40px rgba(0,0,0,0.25)' }}>
-
-          {/* Barra búsqueda + filtros */}
-          <div style={{ display: 'flex', gap: '10px', marginBottom: '14px', alignItems: 'flex-start' }}>
-            <div style={{ position: 'relative', flex: 1, maxWidth: '340px' }}>
-              <input type="text" placeholder="Busca jugadores para tu equipo" value={search} onChange={(e) => setSearch(e.target.value)}
-                style={{ width: '100%', padding: '9px 40px 9px 14px', borderRadius: '8px', border: '1px solid #ddd', fontFamily: "'Inter', sans-serif", fontSize: '12px', color: '#333', outline: 'none', boxSizing: 'border-box', backgroundColor: '#f9f9f9' }} />
-              <div style={{ position: 'absolute', right: '0', top: '0', bottom: '0', width: '38px', backgroundColor: '#2ecc71', borderRadius: '0 8px 8px 0', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }} onClick={fetchPlayers}>
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-                  <circle cx="11" cy="11" r="7" stroke="#fff" strokeWidth="2.2" />
-                  <path d="M16.5 16.5L21 21" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" />
-                </svg>
-              </div>
+        {/* ── Búsqueda + filtros ───────────────────────────────────────────── */}
+        <div
+          style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}
+          onClick={e => e.stopPropagation()}
+        >
+          {/* Input */}
+          <div style={{ position: 'relative', flex: 1, maxWidth: '420px' }}>
+            <input
+              type="text"
+              placeholder="Busca jugadores por nombre..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              style={{
+                width: '100%', padding: '10px 44px 10px 16px',
+                borderRadius: '25px',
+                border: '1px solid rgba(255,255,255,0.2)',
+                backgroundColor: 'rgba(255,255,255,0.1)',
+                backdropFilter: 'blur(8px)',
+                fontFamily: "'Inter', sans-serif", fontSize: '13px',
+                color: '#fff', outline: 'none',
+                boxSizing: 'border-box' as const,
+              }}
+            />
+            <div style={{
+              position: 'absolute', right: 0, top: 0, bottom: 0, width: '44px',
+              backgroundColor: '#FFBF00', borderRadius: '0 25px 25px 0',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
+            }}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                <circle cx="11" cy="11" r="7" stroke="#000" strokeWidth="2.2"/>
+                <path d="M16.5 16.5L21 21" stroke="#000" strokeWidth="2.2" strokeLinecap="round"/>
+              </svg>
             </div>
+          </div>
 
-            <div style={{ position: 'relative' }}>
-              <button onClick={() => { setFiltersOpen(p => !p); setOpenSection(null); }} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '9px 14px', borderRadius: '8px', border: '1px solid #ddd', backgroundColor: '#f9f9f9', fontFamily: "'Inter', sans-serif", fontSize: '12px', cursor: 'pointer', color: '#333', fontWeight: 500, minWidth: '130px', justifyContent: 'space-between' }}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M3 6h18M7 12h10M11 18h2" stroke="#555" strokeWidth="2" strokeLinecap="round" /></svg>
-                  Filtros {activeFiltersCount > 0 && (<span style={{ backgroundColor: '#2ecc71', color: '#fff', borderRadius: '50%', width: '16px', height: '16px', fontSize: '9px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>{activeFiltersCount}</span>)}
+          {/* Filtros */}
+          <div style={{ position: 'relative' }}>
+            <button
+              onClick={e => { e.stopPropagation(); setFiltersOpen(p => !p); setOpenSection(null); }}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '8px',
+                padding: '10px 18px', borderRadius: '25px',
+                border: '1px solid rgba(255,255,255,0.2)',
+                backgroundColor: activeFiltersCount > 0 ? 'rgba(255,191,0,0.15)' : 'rgba(255,255,255,0.1)',
+                backdropFilter: 'blur(8px)',
+                fontFamily: "'Inter', sans-serif", fontSize: '12px',
+                cursor: 'pointer', color: '#fff', fontWeight: 500,
+              }}
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                <path d="M3 6h18M7 12h10M11 18h2" stroke="#fff" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+              Filtros
+              {activeFiltersCount > 0 && (
+                <span style={{
+                  backgroundColor: '#FFBF00', color: '#000',
+                  borderRadius: '50%', width: '18px', height: '18px',
+                  fontSize: '9px', fontWeight: 800,
+                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  {activeFiltersCount}
                 </span>
-                <span style={{ fontSize: '10px', color: '#888' }}>{filtersOpen ? '▲' : '▼'}</span>
-              </button>
+              )}
+            </button>
 
-              {filtersOpen && (
-                <div style={{ position: 'absolute', top: 'calc(100% + 6px)', left: 0, backgroundColor: '#fff', borderRadius: '10px', border: '1px solid #e0e0e0', boxShadow: '0 8px 24px rgba(0,0,0,0.12)', zIndex: 100, width: '220px', overflow: 'hidden' }}>
-                  {/* Edad */}
-                  <div>
-                    <button onClick={() => toggleSection('Edad')} style={{ width: '100%', padding: '10px 14px', border: 'none', background: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: "'Inter', sans-serif", fontSize: '12px', color: '#333', cursor: 'pointer', fontWeight: filters.edad ? 600 : 400 }}>
-                      Edad {filters.edad && <span style={{ color: '#2ecc71', fontSize: '10px' }}>({filters.edad})</span>}
-                      <span style={{ fontSize: '10px', color: '#aaa' }}>›</span>
-                    </button>
-                    {openSection === 'Edad' && (
-                      <div style={{ padding: '6px 14px 10px', borderTop: '1px solid #f0f0f0' }}>
-                        <input type="number" placeholder="Edad exacta" value={filters.edad} onChange={e => setFilters(p => ({ ...p, edad: e.target.value }))} min={15} max={40} style={{ width: '100%', padding: '7px 10px', borderRadius: '6px', border: '1px solid #ddd', fontSize: '12px', fontFamily: "'Inter', sans-serif", outline: 'none', boxSizing: 'border-box' }} />
-                      </div>
-                    )}
-                  </div>
-                  <div style={{ height: '1px', backgroundColor: '#f0f0f0' }} />
+            {filtersOpen && (
+              <div style={{
+                position: 'absolute', top: 'calc(100% + 8px)', left: 0,
+                backgroundColor: 'rgba(0,40,20,0.97)',
+                backdropFilter: 'blur(16px)',
+                borderRadius: '12px',
+                border: '1px solid rgba(255,191,0,0.25)',
+                boxShadow: '0 8px 28px rgba(0,0,0,0.4)',
+                zIndex: 200, width: '220px', overflow: 'hidden',
+              }}>
 
-                  {/* Semestre */}
-                  <div>
-                    <button onClick={() => toggleSection('Semestre')} style={{ width: '100%', padding: '10px 14px', border: 'none', background: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: "'Inter', sans-serif", fontSize: '12px', color: '#333', cursor: 'pointer', fontWeight: filters.semestre ? 600 : 400 }}>
-                      Semestre {filters.semestre && <span style={{ color: '#2ecc71', fontSize: '10px' }}>({filters.semestre})</span>}
-                      <span style={{ fontSize: '10px', color: '#aaa' }}>›</span>
-                    </button>
-                    {openSection === 'Semestre' && (
-                      <div style={{ padding: '6px 14px 10px', borderTop: '1px solid #f0f0f0' }}>
-                        <input type="number" placeholder="Semestre (1-10)" value={filters.semestre} onChange={e => setFilters(p => ({ ...p, semestre: e.target.value }))} min={1} max={10} style={{ width: '100%', padding: '7px 10px', borderRadius: '6px', border: '1px solid #ddd', fontSize: '12px', fontFamily: "'Inter', sans-serif", outline: 'none', boxSizing: 'border-box' }} />
-                      </div>
-                    )}
-                  </div>
-                  <div style={{ height: '1px', backgroundColor: '#f0f0f0' }} />
-
-                  {/* Posición */}
-                  <div>
-                    <button onClick={() => toggleSection('Posicion')} style={{ width: '100%', padding: '10px 14px', border: 'none', background: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: "'Inter', sans-serif", fontSize: '12px', color: '#333', cursor: 'pointer', fontWeight: filters.posicion ? 600 : 400 }}>
-                      Posición {filters.posicion && <span style={{ color: '#2ecc71', fontSize: '10px' }}>({posicionDisplay[filters.posicion]})</span>}
-                      <span style={{ fontSize: '10px', color: '#aaa' }}>›</span>
-                    </button>
-                    {openSection === 'Posicion' && (
-                      <div style={{ padding: '6px 14px 10px', borderTop: '1px solid #f0f0f0', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        {posicionesOpciones.map(p => (
-                          <button key={p.backend} onClick={() => setFilter('posicion', p.backend)} style={{ padding: '5px 10px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontFamily: "'Inter', sans-serif", fontSize: '11px', textAlign: 'left', backgroundColor: filters.posicion === p.backend ? '#2ecc71' : '#f5f5f5', color: filters.posicion === p.backend ? '#fff' : '#333' }}>
-                            {p.label}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                  <div style={{ height: '1px', backgroundColor: '#f0f0f0' }} />
-
-                  {/* Sexo */}
-                  <div>
-                    <button onClick={() => toggleSection('Sexo')} style={{ width: '100%', padding: '10px 14px', border: 'none', background: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: "'Inter', sans-serif", fontSize: '12px', color: '#333', cursor: 'pointer', fontWeight: filters.sexo ? 600 : 400 }}>
-                      Sexo {filters.sexo && <span style={{ color: '#2ecc71', fontSize: '10px' }}>({filters.sexo === 'M' ? 'Masculino' : 'Femenino'})</span>}
-                      <span style={{ fontSize: '10px', color: '#aaa' }}>›</span>
-                    </button>
-                    {openSection === 'Sexo' && (
-                      <div style={{ padding: '6px 14px 10px', borderTop: '1px solid #f0f0f0', display: 'flex', gap: '6px' }}>
-                        {[{ val: 'M', label: 'Masculino' }, { val: 'F', label: 'Femenino' }].map(s => (
-                          <button key={s.val} onClick={() => setFilter('sexo', s.val)} style={{ flex: 1, padding: '5px 8px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontFamily: "'Inter', sans-serif", fontSize: '11px', backgroundColor: filters.sexo === s.val ? '#2ecc71' : '#f5f5f5', color: filters.sexo === s.val ? '#fff' : '#333' }}>
-                            {s.label}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {activeFiltersCount > 0 && (
-                    <div style={{ padding: '8px 14px', borderTop: '1px solid #f0f0f0' }}>
-                      <button onClick={() => setFilters({ edad: '', semestre: '', posicion: '', sexo: '' })} style={{ width: '100%', padding: '6px', borderRadius: '6px', border: 'none', backgroundColor: '#fee', color: '#e53935', fontFamily: "'Inter', sans-serif", fontSize: '11px', cursor: 'pointer', fontWeight: 600 }}>
-                        Limpiar filtros
-                      </button>
+                {/* Edad */}
+                <div>
+                  <button onClick={() => toggleSection('Edad')} style={{ width: '100%', padding: '11px 16px', border: 'none', background: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: "'Inter', sans-serif", fontSize: '12px', color: '#fff', cursor: 'pointer' }}>
+                    <span>Edad {filters.edad && <span style={{ color: '#FFBF00', fontSize: '10px' }}>({filters.edad})</span>}</span>
+                    <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)' }}>›</span>
+                  </button>
+                  {openSection === 'Edad' && (
+                    <div style={{ padding: '6px 16px 12px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+                      <input type="number" placeholder="Ej: 20" value={filters.edad} onChange={e => setFilters(p => ({ ...p, edad: e.target.value }))} min={15} max={40}
+                        style={{ width: '100%', padding: '7px 10px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', backgroundColor: 'rgba(255,255,255,0.08)', fontSize: '12px', fontFamily: "'Inter', sans-serif", outline: 'none', color: '#fff', boxSizing: 'border-box' as const }} />
                     </div>
                   )}
                 </div>
-              )}
-            </div>
-          </div>
+                <div style={{ height: '1px', backgroundColor: 'rgba(255,255,255,0.07)' }} />
 
-          {/* Grid jugadores */}
-          <div style={{ flex: 1, overflowY: 'auto', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', paddingRight: '4px', alignContent: 'start' }}>
-            {loading ? (
-              <div style={{ gridColumn: '1 / -1', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#aaa', fontFamily: "'Inter', sans-serif", fontSize: '13px', padding: '40px' }}>
-                Buscando jugadores...
-              </div>
-            ) : players.length === 0 ? (
-              <div style={{ gridColumn: '1 / -1', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#aaa', fontFamily: "'Inter', sans-serif", fontSize: '13px', padding: '40px' }}>
-                No se encontraron jugadores
-              </div>
-            ) : (
-              players.map((player) => (
-                <div key={player.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', borderRadius: '8px', backgroundColor: 'rgba(255,255,255,0.7)', border: '1px solid rgba(0,0,0,0.06)' }}>
-                  <div style={{ width: '38px', height: '38px', borderRadius: '50%', overflow: 'hidden', flexShrink: 0, backgroundColor: '#ccc', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px' }}>
-                    {player.photoUrl ? <img src={player.photoUrl} alt={player.fullname} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : '👤'}
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ margin: '0 0 1px 0', fontFamily: "'Inter', sans-serif", fontSize: '12px', fontWeight: 600, color: '#222', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {player.fullname}
-                    </p>
-                    <p style={{ margin: 0, fontFamily: "'Inter', sans-serif", fontSize: '9px', color: '#aaa' }}>
-                      {player.age} · {posicionDisplay[player.position] || player.position} · {player.gender}{player.semester ? ` · Sem ${player.semester}` : ''}
-                    </p>
-                    <span style={{ fontSize: '9px', color: player.available ? '#27ae60' : '#e74c3c', fontWeight: 600 }}>
-                      {player.available ? 'Disponible' : 'No disponible'}
-                    </span>
-                  </div>
-                  <button style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px', flexShrink: 0 }} title="Invitar al equipo">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                      <path d="M22 2L11 13" stroke="#aaa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                      <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="#aaa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
+                {/* Semestre */}
+                <div>
+                  <button onClick={() => toggleSection('Semestre')} style={{ width: '100%', padding: '11px 16px', border: 'none', background: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: "'Inter', sans-serif", fontSize: '12px', color: '#fff', cursor: 'pointer' }}>
+                    <span>Semestre {filters.semestre && <span style={{ color: '#FFBF00', fontSize: '10px' }}>({filters.semestre})</span>}</span>
+                    <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)' }}>›</span>
                   </button>
+                  {openSection === 'Semestre' && (
+                    <div style={{ padding: '6px 16px 12px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+                      <input type="number" placeholder="Ej: 4" value={filters.semestre} onChange={e => setFilters(p => ({ ...p, semestre: e.target.value }))} min={1} max={10}
+                        style={{ width: '100%', padding: '7px 10px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', backgroundColor: 'rgba(255,255,255,0.08)', fontSize: '12px', fontFamily: "'Inter', sans-serif", outline: 'none', color: '#fff', boxSizing: 'border-box' as const }} />
+                    </div>
+                  )}
                 </div>
-              ))
+                <div style={{ height: '1px', backgroundColor: 'rgba(255,255,255,0.07)' }} />
+
+                {/* Posición */}
+                <div>
+                  <button onClick={() => toggleSection('Posicion')} style={{ width: '100%', padding: '11px 16px', border: 'none', background: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: "'Inter', sans-serif", fontSize: '12px', color: '#fff', cursor: 'pointer' }}>
+                    <span>Posición {filters.posicion && <span style={{ color: '#FFBF00', fontSize: '10px' }}>({filters.posicion})</span>}</span>
+                    <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)' }}>›</span>
+                  </button>
+                  {openSection === 'Posicion' && (
+                    <div style={{ padding: '6px 16px 12px', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      {posiciones.map(pos => (
+                        <button key={pos} onClick={() => setFilter('posicion', pos)} style={{ padding: '6px 10px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontFamily: "'Inter', sans-serif", fontSize: '11px', textAlign: 'left', backgroundColor: filters.posicion === pos ? '#FFBF00' : 'rgba(255,255,255,0.08)', color: filters.posicion === pos ? '#000' : '#fff', fontWeight: filters.posicion === pos ? 700 : 400 }}>
+                          {pos}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div style={{ height: '1px', backgroundColor: 'rgba(255,255,255,0.07)' }} />
+
+                {/* Sexo */}
+                <div>
+                  <button onClick={() => toggleSection('Sexo')} style={{ width: '100%', padding: '11px 16px', border: 'none', background: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: "'Inter', sans-serif", fontSize: '12px', color: '#fff', cursor: 'pointer' }}>
+                    <span>Sexo {filters.sexo && <span style={{ color: '#FFBF00', fontSize: '10px' }}>({filters.sexo === 'M' ? 'Masc.' : 'Fem.'})</span>}</span>
+                    <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)' }}>›</span>
+                  </button>
+                  {openSection === 'Sexo' && (
+                    <div style={{ padding: '6px 16px 12px', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', gap: '6px' }}>
+                      {[{ val: 'M', label: 'Masculino' }, { val: 'F', label: 'Femenino' }].map(s => (
+                        <button key={s.val} onClick={() => setFilter('sexo', s.val)} style={{ flex: 1, padding: '6px 8px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontFamily: "'Inter', sans-serif", fontSize: '11px', backgroundColor: filters.sexo === s.val ? '#FFBF00' : 'rgba(255,255,255,0.08)', color: filters.sexo === s.val ? '#000' : '#fff', fontWeight: filters.sexo === s.val ? 700 : 400 }}>
+                          {s.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {activeFiltersCount > 0 && (
+                  <div style={{ padding: '8px 16px', borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+                    <button onClick={() => setFilters({ edad: '', semestre: '', posicion: '', sexo: '' })} style={{ width: '100%', padding: '7px', borderRadius: '8px', border: '1px solid rgba(255,80,80,0.3)', backgroundColor: 'rgba(255,80,80,0.1)', color: '#ff6b6b', fontFamily: "'Inter', sans-serif", fontSize: '11px', cursor: 'pointer', fontWeight: 600 }}>
+                      Limpiar filtros
+                    </button>
+                  </div>
+                )}
+              </div>
             )}
           </div>
         </div>
+
+        {/* ── Grid jugadores ───────────────────────────────────────────────── */}
+        <div style={{
+          flex: 1, overflowY: 'auto',
+          display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)',
+          gap: '10px', alignContent: 'start', paddingRight: '4px',
+        }}>
+          {filtered.length === 0 ? (
+            <div style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.4)', fontFamily: "'Inter', sans-serif", fontSize: '13px', padding: '60px', gap: '10px' }}>
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
+                <circle cx="11" cy="11" r="7" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5"/>
+                <path d="M16.5 16.5L21 21" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
+              No se encontraron jugadores
+            </div>
+          ) : (
+            filtered.map(player => {
+              const col = colPosicion[player.posicion] ?? '#555';
+              return (
+                <div
+                  key={player.id}
+                  style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', borderRadius: '12px', backgroundColor: 'rgba(0,80,40,0.45)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.1)', transition: 'all 0.2s' }}
+                  onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'rgba(0,100,50,0.6)'; e.currentTarget.style.borderColor = 'rgba(255,191,0,0.35)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'rgba(0,80,40,0.45)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; }}
+                >
+                  {/* Avatar — icono blanco */}
+                  <div style={{ width: '42px', height: '42px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.15)', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid rgba(255,255,255,0.3)' }}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                      <circle cx="12" cy="8" r="4" fill="rgba(255,255,255,0.9)"/>
+                      <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" fill="rgba(255,255,255,0.9)"/>
+                    </svg>
+                  </div>
+
+                  {/* Info */}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ margin: '0 0 2px', fontFamily: "'Montserrat', sans-serif", fontSize: '12px', fontWeight: 700, color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {player.name}
+                    </p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                      <span style={{ backgroundColor: col, color: '#fff', fontSize: '9px', fontWeight: 700, padding: '1px 6px', borderRadius: '4px', fontFamily: "'Inter', sans-serif", textTransform: 'uppercase', letterSpacing: '0.3px' }}>
+                        {player.posicion}
+                      </span>
+                      <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.55)', fontFamily: "'Inter', sans-serif" }}>
+                        {player.edad} años · Sem {player.semestre} · {player.sexo === 'M' ? 'M' : 'F'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Botón invitar — solo capitán */}
+                  {esCapitan && (
+                    <button
+                      title="Invitar al equipo"
+                      style={{ backgroundColor: '#FFBF00', border: 'none', borderRadius: '20px', padding: '5px 12px', cursor: 'pointer', flexShrink: 0, fontFamily: "'Inter', sans-serif", fontSize: '10px', fontWeight: 700, color: '#000', transition: 'all 0.15s' }}
+                      onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#e6ac00'; }}
+                      onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#FFBF00'; }}
+                    >
+                      Invitar
+                    </button>
+                  )}
+                </div>
+              );
+            })
+          )}
+        </div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 };
 

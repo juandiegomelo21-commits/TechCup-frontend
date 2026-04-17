@@ -12,11 +12,11 @@ Realizar una pagina web que permita gestionar todo lo relacionado con la organiz
 Sistemas para facilitar su planeación y desarrollo.
 
 ## 🎨 Logotipo
-![Captura de pantalla 2026-03-11 184416.png](recursos/Captura%20de%20pantalla%202026-03-11%20184416.png)
+![Logo.png](recursos/Logo.png)
 
 
 ## 📖 Manual de identidad visual
-[Manual de Identidad.pdf](../../../Downloads/Manual%20de%20Identidad.pdf)
+[Manual de Identidad TECHCUP.pdf](recursos/Manual%20de%20Identidad%20TECHCUP.pdf)
 ## 🖼️ Mockups del sistema
 
 https://www.figma.com/design/ntuQw9HDK5ni4791nbgedM/Tech?node-id=0-1&t=kr0Eo4dDKfF1WGFL-1
