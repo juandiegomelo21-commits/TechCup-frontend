@@ -217,6 +217,7 @@ const DashboardJugador = () => {
   }, []);
 
   const handleConfirmarCapitan = () => {
+    localStorage.setItem('rol', 'capitan');
     setMostrarModal(false);
     navigate('/dashboard/capitan');
   };

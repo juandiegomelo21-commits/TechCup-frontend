@@ -42,8 +42,8 @@ const TEAM_COLORS = ['#e74c3c', '#27ae60', '#e67e22', '#8e44ad', '#2980b9', '#16
 const accesos = [
   { label: 'Crear Torneo',      icon: <IconCrearTorneo />,      path: '/torneo/crear' },
   { label: 'Configurar Reglas', icon: <IconConfigurarReglas />, path: '/torneo/reglas' },
-  { label: 'Iniciar Jornada',   icon: <IconIniciarJornada />,   path: '/torneo/jornada' },
-  { label: 'Finalizar Torneo',  icon: <IconFinalizarTorneo />,  path: '/torneo/finalizar' },
+  { label: 'Gestionar Torneo',  icon: <IconIniciarJornada />,   path: '/torneo' },
+  { label: 'Ver Torneos',       icon: <IconFinalizarTorneo />,  path: '/torneo' },
 ];
 
 // ── Dashboard Organizador ───────────────────────────────────────────────────
@@ -250,7 +250,7 @@ const DashboardOrganizador = () => {
                   </span>
 
                   <button
-                    onClick={() => navigate(`/equipo/${equipo.id}`)}
+                    onClick={() => navigate(`/torneo`)}
                     style={{
                       backgroundColor: '#FFBF00', color: '#000', border: 'none',
                       borderRadius: '20px', padding: '6px 16px', fontSize: '11px',
