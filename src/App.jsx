@@ -20,6 +20,7 @@ import AdminProfilePage from './Pages/AdminProfilePage'
 import Torneo from './Pages/Torneos';
 import Pagos from './Pages/Pagos';
 import Historial from './Pages/Historial';
+import Reglas from './Pages/Reglas';
 
 function App() {
   return (
@@ -46,7 +47,8 @@ function App() {
         <Route path="/admin-profile" element={<AdminProfilePage />} />
         <Route path="/torneo" element={<Torneo />} />
         <Route path="/pagos" element={<Pagos />} />
-        <Route path="/historial" element={<historial />} />
+        <Route path="/historial" element={<Historial />} />
+        <Route path="/torneo/reglas" element={< Reglas />} />
 
 
       </Routes>
