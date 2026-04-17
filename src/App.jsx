@@ -17,6 +17,8 @@ import OAuthCallbackPage from './Pages/OAuthCallbackPage';
 import CreateTournamentPage from './Pages/CreateTournamentPage';
 import Torneo from './Pages/Torneos';
 import Pagos from './Pages/Pagos';
+import Historial from './Pages/Historial';
+
 
 function App() {
   return (
@@ -41,6 +43,7 @@ function App() {
         <Route path="/mercado" element={<PlayerSearchPage />} />
         <Route path="/torneo" element={<Torneo />} />
         <Route path="/pagos" element={<Pagos />} />
+        <Route path="/Historial" element={<Historial />} />
 
 
 
