@@ -15,7 +15,7 @@ import MiEquipo from './Pages/MiEquipo';
 import PizarraTactica from './Pages/PizarraTactica';
 import OAuthCallbackPage from './Pages/OAuthCallbackPage';
 import CreateTournamentPage from './Pages/CreateTournamentPage';
-import RefereeProfilePage from './Pages/RefereeProfilePage'
+import RefereeProfilePage from './Pages/RefreeProfilePage.tsx'
 import AdminProfilePage from './Pages/AdminProfilePage'
 import Torneo from './Pages/Torneos';
 import Pagos from './Pages/Pagos';
@@ -29,28 +29,25 @@ function App() {
         <Route path="/" element={<WelcomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        <Route path="/dashboard" element={<DashboardJugador />} />
-        <Route path="/dashboard/capitan" element={<DashboardCapitan />} />
         <Route path="/account-created" element={<AccountCreatedPage />} />
         <Route path="/email-sent" element={<EmailSentPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-        <Route path="/player-profile" element={<PlayerProfilePage />} />
-        <Route path="/mercado" element={<PlayerSearchPage />} />
-        <Route path="/torneo/crear" element={<CreateTournamentPage />} />
+        <Route path="/dashboard" element={<DashboardJugador />} />
+        <Route path="/dashboard/capitan" element={<DashboardCapitan />} />
         <Route path="/dashboard/org" element={<DashboardOrganizador />} />
         <Route path="/dashboard/arbitro" element={<DashboardArbitro />} />
+        <Route path="/player-profile" element={<PlayerProfilePage />} />
+        <Route path="/referee-profile" element={<RefereeProfilePage />} />
+        <Route path="/admin-profile" element={<AdminProfilePage />} />
+        <Route path="/mercado" element={<PlayerSearchPage />} />
+        <Route path="/torneo" element={<Torneo />} />
+        <Route path="/torneo/crear" element={<CreateTournamentPage />} />
+        <Route path="/torneo/reglas" element={<Reglas />} />
         <Route path="/equipo" element={<MiEquipo />} />
         <Route path="/equipo/pizarra" element={<PizarraTactica />} />
         <Route path="/oauth2/callback" element={<OAuthCallbackPage />} />
-        <Route path="/mercado" element={<PlayerSearchPage />} />
-        <Route path="/referee-profile" element={<RefereeProfilePage />} />
-        <Route path="/admin-profile" element={<AdminProfilePage />} />
-        <Route path="/torneo" element={<Torneo />} />
         <Route path="/pagos" element={<Pagos />} />
         <Route path="/historial" element={<Historial />} />
-        <Route path="/torneo/reglas" element={< Reglas />} />
-
-
       </Routes>
     </BrowserRouter>
   );
