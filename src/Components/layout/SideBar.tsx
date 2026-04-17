@@ -108,19 +108,8 @@ const Sidebar = ({ onClose, isMobile }: SidebarProps) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const dashboardPath = (() => {
-    const rol = localStorage.getItem('rol');
-    switch (rol) {
-      case 'organizador':
-      case 'admin':   return '/dashboard/org';
-      case 'arbitro': return '/dashboard/arbitro';
-      case 'capitan': return '/dashboard/capitan';
-      default:        return '/dashboard';
-    }
-  })();
-
   const mainItems: SidebarItem[] = [
-    { label: 'Panel Principal', path: dashboardPath, icon: <PanelIcon /> },
+    { label: 'Panel Principal', path: '/dashboard', icon: <PanelIcon /> },
     ...staticItems,
   ];
 
@@ -129,6 +118,11 @@ const Sidebar = ({ onClose, isMobile }: SidebarProps) => {
     navigate(resolvedPath);
     if (isMobile && onClose) onClose();
   };
+
+  const isActive = (path: string) =>
+    path === '/dashboard'
+      ? location.pathname === getDashboardPath()
+      : location.pathname === path;
 
   const itemStyle = (path: string): React.CSSProperties => ({
     display: 'flex',
@@ -139,10 +133,10 @@ const Sidebar = ({ onClose, isMobile }: SidebarProps) => {
     cursor: 'pointer',
     fontFamily: "'Inter', sans-serif",
     fontSize: '13px',
-    color: location.pathname === path ? '#FFBF00' : '#ffffff',
-    backgroundColor: location.pathname === path ? 'rgba(255,191,0,0.15)' : 'transparent',
+    color: isActive(path) ? '#FFBF00' : '#ffffff',
+    backgroundColor: isActive(path) ? 'rgba(255,191,0,0.15)' : 'transparent',
     transition: 'all 0.2s',
-    fontWeight: location.pathname === path ? 'bold' : 'normal',
+    fontWeight: isActive(path) ? 'bold' : 'normal',
   });
 
   return (
@@ -184,7 +178,7 @@ const Sidebar = ({ onClose, isMobile }: SidebarProps) => {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flex: 1 }}>
         {mainItems.map((item) => (
           <div key={item.path} style={itemStyle(item.path)} onClick={() => handleNav(item.path)}>
-            <span style={{ color: location.pathname === item.path ? '#FFBF00' : '#ffffff', display: 'flex' }}>
+            <span style={{ color: isActive(item.path) ? '#FFBF00' : '#ffffff', display: 'flex' }}>
               {item.icon}
             </span>
             <span>{item.label}</span>
