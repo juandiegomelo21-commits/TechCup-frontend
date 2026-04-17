@@ -17,6 +17,7 @@ import OAuthCallbackPage from './Pages/OAuthCallbackPage';
 import CreateTournamentPage from './Pages/CreateTournamentPage';
 import RefereeProfilePage from './Pages/RefereeProfilePage';
 import AdminProfilePage from './Pages/AdminProfilePage';
+import TournamentDetailPage from './Pages/TournamentDetailPage';
 import Torneo from './Pages/Torneos';
 import Pagos from './Pages/Pagos';
 import Historial from './Pages/Historial';
@@ -44,6 +45,7 @@ function App() {
         <Route path="/referee-profile" element={<RefereeProfilePage />} />
         <Route path="/admin-profile" element={<AdminProfilePage />} />
         <Route path="/torneo" element={<Torneo />} />
+        <Route path="/torneo/:id" element={<TournamentDetailPage />} />
         <Route path="/pagos" element={<Pagos />} />
         <Route path="/historial" element={<Historial />} />
       </Routes>
