@@ -221,26 +221,41 @@ const Torneo = () => {
         </div>
 
         {/* Botones */}
-        <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', paddingBottom: '10px' }}>
-          {localStorage.getItem('rol') === 'organizador' && (
-            <button
-              onClick={() => navigate('/torneo/crear')}
-              style={OVAL_BUTTON_STYLE}
-              onMouseOver={e => (e.currentTarget.style.opacity = '0.9')}
-              onMouseOut={e => (e.currentTarget.style.opacity = '1')}
-            >
-              Inscribir Nuevo Torneo
-            </button>
-          )}
-          <button
-            onClick={() => navigate('/historial')}
-            style={OVAL_BUTTON_STYLE}
-            onMouseOver={e => (e.currentTarget.style.opacity = '0.9')}
-            onMouseOut={e => (e.currentTarget.style.opacity = '1')}
-          >
-            Ver Historial
-          </button>
-        </div>
+        {(() => {
+          const rol = localStorage.getItem('rol');
+          return (
+            <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', paddingBottom: '10px' }}>
+              {rol === 'organizador' && (
+                <button
+                  onClick={() => navigate('/torneo/crear')}
+                  style={OVAL_BUTTON_STYLE}
+                  onMouseOver={e => (e.currentTarget.style.opacity = '0.9')}
+                  onMouseOut={e => (e.currentTarget.style.opacity = '1')}
+                >
+                  Crear Torneo
+                </button>
+              )}
+              {rol === 'capitan' && (
+                <button
+                  onClick={() => navigate('/pagos')}
+                  style={OVAL_BUTTON_STYLE}
+                  onMouseOver={e => (e.currentTarget.style.opacity = '0.9')}
+                  onMouseOut={e => (e.currentTarget.style.opacity = '1')}
+                >
+                  Inscribirse al Torneo
+                </button>
+              )}
+              <button
+                onClick={() => navigate('/historial')}
+                style={OVAL_BUTTON_STYLE}
+                onMouseOver={e => (e.currentTarget.style.opacity = '0.9')}
+                onMouseOut={e => (e.currentTarget.style.opacity = '1')}
+              >
+                Ver Historial
+              </button>
+            </div>
+          );
+        })()}
       </div>
     </DashboardLayout>
   );
