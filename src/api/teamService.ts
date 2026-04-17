@@ -18,3 +18,16 @@ export const getTeamByIdApi = async (id: string): Promise<TeamResponse> => {
   const response = await apiClient.get<TeamResponse>(`/api/teams/${id}`);
   return response.data;
 };
+
+export interface CreateTeamRequest {
+  teamName: string;
+  shieldUrl: string;
+  uniformColors: string[];
+  captainId: string;
+  playerIds: string[];
+}
+
+export const createTeamApi = async (data: CreateTeamRequest): Promise<TeamResponse> => {
+  const response = await apiClient.post<TeamResponse>('/api/teams', data);
+  return response.data;
+};
