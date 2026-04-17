@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../Components/layout/DashboardLayout';
 import { getTournamentsApi, TournamentResponse } from '../api/tournamentService';
 import { getStandingsApi, TeamStanding } from '../api/standingsService';
+import apiClient from '../api/axiosInstance';
 
 const TEXT_BASE = {
   fontFamily: "'Montserrat', sans-serif",
@@ -27,10 +28,31 @@ const OVAL_BUTTON_STYLE: React.CSSProperties = {
   justifyContent: 'center',
 };
 
-const TbcCard = ({ date }: { date?: string }) => (
+const phaseLabel: Record<string, string> = {
+  INITIAL_ROUND: 'OCTAVOS',
+  QUARTER_FINALS: 'CUARTOS',
+  SEMI_FINALS: 'SEMIFINAL',
+  FINAL: 'FINAL',
+};
+
+interface BracketMatch {
+  matchId: string;
+  localTeamName: string;
+  visitorTeamName: string;
+  scoreLocal: number | null;
+  scoreVisitor: number | null;
+  winnerName: string | null;
+  status: string;
+}
+
+interface Phase {
+  phase: string;
+  matches: BracketMatch[];
+}
+
+const MatchCard = ({ match }: { match?: BracketMatch }) => (
   <div style={{ marginBottom: '6px' }}>
-    <div style={{ ...TEXT_BASE, fontSize: '9px', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', marginBottom: '4px', fontWeight: 600 }}>{date || 'TBC'}</div>
-    {[1, 2].map((_, i) => (
+    {[match?.localTeamName, match?.visitorTeamName].map((name, i) => (
       <div key={i} style={{
         display: 'flex', alignItems: 'center', gap: '10px',
         background: 'rgba(0,0,0,0.4)',
@@ -40,8 +62,10 @@ const TbcCard = ({ date }: { date?: string }) => (
         width: '200px',
         marginBottom: i === 0 ? '4px' : '0',
       }}>
-        <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: 'rgba(255,255,255,0.2)' }} />
-        <span style={{ ...TEXT_BASE, color: 'rgba(255,255,255,0.3)', fontSize: '12px', fontWeight: 500 }}>TBC</span>
+        <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: name ? '#FFBF00' : 'rgba(255,255,255,0.2)', flexShrink: 0 }} />
+        <span style={{ ...TEXT_BASE, color: name ? '#fff' : 'rgba(255,255,255,0.3)', fontSize: '11px', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {name ?? 'TBC'}
+        </span>
       </div>
     ))}
   </div>
@@ -52,7 +76,9 @@ const Torneo = () => {
   const [tournaments, setTournaments] = useState<TournamentResponse[]>([]);
   const [selectedId, setSelectedId] = useState<string>('');
   const [standings, setStandings] = useState<TeamStanding[]>([]);
+  const [phases, setPhases] = useState<Phase[]>([]);
   const [loadingStandings, setLoadingStandings] = useState(false);
+  const [loadingBracket, setLoadingBracket] = useState(false);
 
   useEffect(() => {
     getTournamentsApi()
@@ -64,23 +90,24 @@ const Torneo = () => {
   }, []);
 
   useEffect(() => {
-    if (!selectedId) { setStandings([]); return; }
+    if (!selectedId) { setStandings([]); setPhases([]); return; }
+
     setLoadingStandings(true);
     getStandingsApi(selectedId)
       .then(data => setStandings(data.standings ?? []))
       .catch(() => setStandings([]))
       .finally(() => setLoadingStandings(false));
+
+    setLoadingBracket(true);
+    apiClient.get(`/api/brackets/tournament/${selectedId}`)
+      .then(res => setPhases(res.data.phases ?? []))
+      .catch(() => setPhases([]))
+      .finally(() => setLoadingBracket(false));
   }, [selectedId]);
 
   return (
     <DashboardLayout>
-      <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '24px',
-        height: '100%',
-        fontFamily: "'Montserrat', sans-serif",
-      }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', height: '100%', fontFamily: "'Montserrat', sans-serif" }}>
 
         {/* Selector de torneo */}
         {tournaments.length > 1 && (
@@ -102,11 +129,11 @@ const Torneo = () => {
           </div>
         )}
 
-        {/* Árbol de Torneo */}
+        {/* Contenido principal */}
         <div style={{
-          background: 'rgba(0, 0, 0, 0.25)',
+          background: 'rgba(0,0,0,0.25)',
           borderRadius: '16px',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
+          border: '1px solid rgba(255,255,255,0.1)',
           padding: '28px',
           display: 'flex',
           gap: '15px',
@@ -116,42 +143,46 @@ const Torneo = () => {
           backdropFilter: 'blur(4px)',
         }}>
 
-          {/* Round of 16 */}
-          <div>
-            <h4 style={{ ...TEXT_BASE, color: '#FFBF00', fontSize: '12px', fontWeight: 700, textAlign: 'center', marginBottom: '24px', letterSpacing: '2px', textTransform: 'uppercase' }}>OCTAVOS</h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
-              {[0, 1].map(gi => (
-                <div key={gi} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-                  <TbcCard />
-                  <TbcCard />
+          {/* Bracket */}
+          {loadingBracket ? (
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <p style={{ ...TEXT_BASE, opacity: 0.5, fontSize: '13px' }}>Cargando bracket...</p>
+            </div>
+          ) : phases.length === 0 ? (
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '30px' }}>
+              {/* Sin bracket generado — mostrar estructura vacía */}
+              {['INITIAL_ROUND', 'QUARTER_FINALS', 'SEMI_FINALS', 'FINAL'].map((ph, pi) => (
+                <div key={ph} style={{ display: 'inline-block' }}>
+                  <h4 style={{ ...TEXT_BASE, color: '#FFBF00', fontSize: '12px', fontWeight: 700, textAlign: 'center', marginBottom: '16px', letterSpacing: '2px', textTransform: 'uppercase' }}>
+                    {phaseLabel[ph]}
+                  </h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+                    {Array.from({ length: Math.max(1, 4 / (2 ** pi)) }).map((_, i) => (
+                      <MatchCard key={i} />
+                    ))}
+                  </div>
                 </div>
               ))}
             </div>
-          </div>
-
-          {/* Conectores */}
-          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-around', height: '100%', paddingTop: '50px' }}>
-            <div style={{ height: '160px', border: '2px solid rgba(255,255,255,0.15)', borderLeft: 0, width: '24px', marginBottom: '90px' }} />
-            <div style={{ height: '160px', border: '2px solid rgba(255,255,255,0.15)', borderLeft: 0, width: '24px' }} />
-          </div>
-
-          {/* Quarter-Finals */}
-          <div style={{ paddingTop: '60px' }}>
-            <h4 style={{ ...TEXT_BASE, color: '#FFBF00', fontSize: '12px', fontWeight: 700, textAlign: 'center', marginBottom: '24px', letterSpacing: '2px', textTransform: 'uppercase' }}>CUARTOS</h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '120px' }}>
-              <TbcCard />
-              <TbcCard />
+          ) : (
+            <div style={{ display: 'flex', gap: '30px', alignItems: 'flex-start' }}>
+              {phases.map((phase) => (
+                <div key={phase.phase}>
+                  <h4 style={{ ...TEXT_BASE, color: '#FFBF00', fontSize: '12px', fontWeight: 700, textAlign: 'center', marginBottom: '16px', letterSpacing: '2px', textTransform: 'uppercase' }}>
+                    {phaseLabel[phase.phase] ?? phase.phase}
+                  </h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+                    {phase.matches.map(m => (
+                      <MatchCard key={m.matchId} match={m} />
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
-          </div>
-
-          {/* Semi-Finals */}
-          <div style={{ paddingTop: '160px', marginLeft: '30px' }}>
-            <h4 style={{ ...TEXT_BASE, color: '#FFBF00', fontSize: '12px', fontWeight: 700, textAlign: 'center', marginBottom: '24px', letterSpacing: '2px', textTransform: 'uppercase' }}>SEMIFINAL</h4>
-            <TbcCard />
-          </div>
+          )}
 
           {/* Tabla de Posiciones */}
-          <div style={{ marginLeft: 'auto', minWidth: '240px' }}>
+          <div style={{ marginLeft: 'auto', minWidth: '240px', flexShrink: 0 }}>
             <div style={{
               background: 'rgba(0,0,0,0.5)',
               border: '1px solid rgba(255,255,255,0.15)',
@@ -194,17 +225,16 @@ const Torneo = () => {
           <button
             onClick={() => navigate('/torneo/crear')}
             style={OVAL_BUTTON_STYLE}
-            onMouseOver={(e) => (e.currentTarget.style.opacity = '0.9')}
-            onMouseOut={(e) => (e.currentTarget.style.opacity = '1')}
+            onMouseOver={e => (e.currentTarget.style.opacity = '0.9')}
+            onMouseOut={e => (e.currentTarget.style.opacity = '1')}
           >
             Inscribir Nuevo Torneo
           </button>
-
           <button
             onClick={() => navigate('/historial')}
             style={OVAL_BUTTON_STYLE}
-            onMouseOver={(e) => (e.currentTarget.style.opacity = '0.9')}
-            onMouseOut={(e) => (e.currentTarget.style.opacity = '1')}
+            onMouseOver={e => (e.currentTarget.style.opacity = '0.9')}
+            onMouseOut={e => (e.currentTarget.style.opacity = '1')}
           >
             Ver Historial
           </button>
