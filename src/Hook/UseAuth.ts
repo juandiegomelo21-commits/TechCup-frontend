@@ -30,6 +30,7 @@ export const useAuth = () => {
       localStorage.setItem('token', response.token);
       localStorage.setItem('email', response.email);
       localStorage.setItem('rol', rol);
+      if (response.userId) localStorage.setItem('userId', response.userId);
       setUser({
         id: '',
         name: response.email,
