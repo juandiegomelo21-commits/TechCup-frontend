@@ -46,10 +46,9 @@ const RefereeProfilePage = () => {
   useEffect(() => {
     const email = localStorage.getItem('email');
     if (!email) { navigate('/login'); return; }
-
     getRefereeByEmailApi(email)
       .then(data => setReferee(data))
-      .catch(() => setLoading(false))
+      .catch(() => {})
       .finally(() => setLoading(false));
   }, [navigate]);
 
@@ -63,9 +62,8 @@ const RefereeProfilePage = () => {
     );
   }
 
-  if (!referee) return null;
-
-  const partidos = referee.assignedMatches?.length ?? 0;
+  const email = localStorage.getItem('email') ?? '';
+  const matchesOfficiated = referee?.assignedMatches?.length ?? 0;
 
   return (
     <DashboardLayout>
@@ -80,7 +78,7 @@ const RefereeProfilePage = () => {
               </div>
               <div>
                 <p style={{ margin: '0 0 5px 0', fontFamily: "'Inter', sans-serif", fontSize: '16px', fontWeight: 700, color: '#1a1a1a' }}>
-                  {referee.fullname}
+                  {referee?.fullname ?? email}
                 </p>
                 <span style={{ backgroundColor: '#4FC3F7', color: '#0D47A1', borderRadius: '20px', padding: '2px 10px', fontSize: '10px', fontFamily: "'Inter', sans-serif", fontWeight: 600 }}>
                   Árbitro
@@ -102,12 +100,12 @@ const RefereeProfilePage = () => {
             <div style={{ display: 'flex', gap: '12px', marginBottom: '10px' }}>
               <div style={{ flex: 1 }}>
                 <p style={{ margin: '0 0 2px 0', fontSize: '9px', color: '#999', fontFamily: "'Inter', sans-serif", textTransform: 'uppercase', letterSpacing: '0.05em' }}>NOMBRE COMPLETO</p>
-                <p style={{ margin: 0, fontSize: '12px', color: '#333', fontFamily: "'Inter', sans-serif" }}>{referee.fullname}</p>
+                <p style={{ margin: 0, fontSize: '12px', color: '#333', fontFamily: "'Inter', sans-serif" }}>{referee?.fullname ?? '—'}</p>
               </div>
               <div style={{ flex: 1 }}>
                 <p style={{ margin: '0 0 2px 0', fontSize: '9px', color: '#999', fontFamily: "'Inter', sans-serif", textTransform: 'uppercase', letterSpacing: '0.05em' }}>ID</p>
                 <p style={{ margin: 0, fontSize: '12px', color: '#333', fontFamily: "'Inter', sans-serif", display: 'flex', alignItems: 'center', gap: '5px' }}>
-                  <IconId /> {referee.id}
+                  <IconId /> {referee?.id ?? '—'}
                 </p>
               </div>
             </div>
@@ -115,7 +113,7 @@ const RefereeProfilePage = () => {
             <div style={{ marginBottom: '16px' }}>
               <p style={{ margin: '0 0 2px 0', fontSize: '9px', color: '#999', fontFamily: "'Inter', sans-serif", textTransform: 'uppercase', letterSpacing: '0.05em' }}>EMAIL</p>
               <p style={{ margin: 0, fontSize: '12px', color: '#333', fontFamily: "'Inter', sans-serif", display: 'flex', alignItems: 'center', gap: '5px' }}>
-                <IconMail /> {referee.email}
+                <IconMail /> {referee?.email ?? email}
               </p>
             </div>
 
@@ -129,13 +127,13 @@ const RefereeProfilePage = () => {
               <div style={{ flex: 1 }}>
                 <p style={{ margin: '0 0 2px 0', fontSize: '9px', color: '#999', fontFamily: "'Inter', sans-serif", textTransform: 'uppercase', letterSpacing: '0.05em' }}>PARTIDOS ASIGNADOS</p>
                 <p style={{ margin: 0, fontSize: '12px', color: '#333', fontFamily: "'Inter', sans-serif", display: 'flex', alignItems: 'center', gap: '5px' }}>
-                  <IconId /> {partidos}
+                  <IconId /> {matchesOfficiated}
                 </p>
               </div>
               <div style={{ flex: 1 }}>
                 <p style={{ margin: '0 0 2px 0', fontSize: '9px', color: '#999', fontFamily: "'Inter', sans-serif", textTransform: 'uppercase', letterSpacing: '0.05em' }}>PRÓXIMO PARTIDO</p>
                 <p style={{ margin: 0, fontSize: '12px', color: '#333', fontFamily: "'Inter', sans-serif", display: 'flex', alignItems: 'center', gap: '5px' }}>
-                  <IconClock /> {partidos > 0 ? new Date(referee.assignedMatches[0].dateTime).toLocaleDateString('es-CO', { day: '2-digit', month: 'short' }) : 'Sin asignar'}
+                  <IconClock /> {matchesOfficiated > 0 ? new Date(referee!.assignedMatches[0].dateTime).toLocaleDateString('es-CO', { day: '2-digit', month: 'short' }) : 'Sin asignar'}
                 </p>
               </div>
             </div>
@@ -146,7 +144,7 @@ const RefereeProfilePage = () => {
                 <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '9px', color: 'rgba(255,255,255,0.85)' }}>Estado</span>
               </div>
               <div style={{ flex: 1, padding: '10px 8px', backgroundColor: '#F5C518', borderRadius: '8px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
-                <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '12px', fontWeight: 700, color: '#1a1a1a' }}>{partidos}</span>
+                <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '12px', fontWeight: 700, color: '#1a1a1a' }}>{matchesOfficiated}</span>
                 <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '9px', color: '#555' }}>Partidos Arbitrados</span>
               </div>
               <div style={{ flex: 1, padding: '10px 8px', backgroundColor: '#4FC3F7', borderRadius: '8px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
