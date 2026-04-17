@@ -19,6 +19,8 @@ import RefereeProfilePage from '/.Pages/RefereeProfilePage'
 import AdminProfilePage from '/.Pages/AdminProfilePage'
 import Torneo from './Pages/Torneos';
 import Pagos from './Pages/Pagos';
+import Historial from './Pages/Historial';
+
 
 function App() {
   return (
@@ -45,6 +47,7 @@ function App() {
         <Route path="/admin-profile" element={<AdminProfilePage />} />
         <Route path="/torneo" element={<Torneo />} />
         <Route path="/pagos" element={<Pagos />} />
+        <Route path="/Historial" element={<Historial />} />
 
       </Routes>
     </BrowserRouter>
