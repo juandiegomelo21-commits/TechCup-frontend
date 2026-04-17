@@ -1,227 +1,245 @@
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../Components/layout/DashboardLayout';
 import { getTournamentsApi } from '../api/tournamentService';
+import { getTeamsApi } from '../api/teamService';
+import { uploadReceiptApi, getPaymentByTeamApi, PaymentResponse } from '../api/paymentService';
 
-// ─── Tipos ─────────────────────────────────────────────────────────────────────
-interface TorneoPago {
-  id: string;
-  nombre: string;
-  estado: 'Pendiente' | 'Pagado';
-}
-
-// ─── Estilos Base ──────────────────────────────────────────────────────────────
-const TEXT_BASE: React.CSSProperties = {
-  fontFamily: "'Montserrat', sans-serif",
-  color: '#ffffff',
+const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
+  PENDING:      { label: 'Pendiente',   color: '#aaaaaa' },
+  UNDER_REVIEW: { label: 'En Revisión', color: '#FFBF00' },
+  APPROVED:     { label: 'Aprobado ✓',  color: '#27ae60' },
+  REJECTED:     { label: 'Rechazado ✗', color: '#e74c3c' },
 };
 
-const OVAL_BUTTON: React.CSSProperties = {
-  background: '#FFBF00',
-  borderRadius: '24px',
-  border: 'none',
-  padding: '10px 20px',
-  cursor: 'pointer',
-  fontFamily: "'Montserrat', sans-serif",
-  fontWeight: 700,
-  fontSize: '11px',
-  textTransform: 'uppercase',
-  color: '#1a1a1a',
-  transition: 'transform 0.1s, opacity 0.2s',
-};
-
-// ─── Icono de Subida (SVG redondeado como la imagen de referencia) ──────────────
-const UploadIconRounded = () => (
-  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" style={{ color: '#888888' }}>
-    {/* Círculo de fondo claro */}
-    <circle cx="12" cy="12" r="10" fill="#f0f0f5" />
-
-    {/* Icono de subida (flecha y bandeja) */}
-    <path d="M12 4L12 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    <path d="M9 7L12 4L15 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M5 16C5 17.6569 6.34315 19 8 19H16C17.6569 19 19 17.6569 19 16V14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-  </svg>
-);
-
-// ─── Componente Principal ──────────────────────────────────────────────────────
 const Pagos = () => {
-  const [torneoSeleccionado, setTorneoSeleccionado] = useState<TorneoPago | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [fileUploaded, setFileUploaded] = useState<File | null>(null);
-  const [listaTorneos, setListaTorneos] = useState<TorneoPago[]>([]);
+  const [torneos, setTorneos] = useState<{ id: string; name: string }[]>([]);
+  const [teamId, setTeamId] = useState<string | null>(null);
+  const [teamName, setTeamName] = useState('');
+  const [torneoId, setTorneoId] = useState('');
+  const [payment, setPayment] = useState<PaymentResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const [file, setFile] = useState<File | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
 
   useEffect(() => {
-    getTournamentsApi()
-      .then(data => setListaTorneos(data.map(t => ({ id: t.id, nombre: t.name, estado: 'Pendiente' as const }))))
-      .catch(() => setListaTorneos([]));
+    const userId = localStorage.getItem('userId') ?? '';
+    Promise.all([getTournamentsApi(), getTeamsApi()])
+      .then(([ts, teams]) => {
+        setTorneos(ts);
+        const myTeam = teams.find(t => t.captainId === userId);
+        if (myTeam) {
+          setTeamId(myTeam.id);
+          setTeamName(myTeam.teamName);
+          return getPaymentByTeamApi(myTeam.id).catch(() => null);
+        }
+        return null;
+      })
+      .then(p => { if (p) setPayment(p); })
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
-  const abrirPago = (torneo: TorneoPago) => {
-    setTorneoSeleccionado(torneo);
-    setIsModalOpen(true);
-    setFileUploaded(null); // Reiniciar estado al abrir
-  };
-
-  // Simulación de subida de archivo
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files[0]) {
-      setFileUploaded(event.target.files[0]);
+  const handleEnviar = async () => {
+    if (!file || !teamId || !torneoId) return;
+    setSubmitting(true);
+    setError('');
+    try {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onloadend = async () => {
+        try {
+          const p = await uploadReceiptApi(teamId, reader.result as string);
+          setPayment(p);
+          setSuccess(true);
+        } catch (err: any) {
+          setError(err?.response?.data?.error ?? 'Error al enviar el comprobante.');
+        } finally {
+          setSubmitting(false);
+        }
+      };
+    } catch {
+      setError('No se pudo leer el archivo.');
+      setSubmitting(false);
     }
   };
 
+  const statusInfo = payment ? (STATUS_CONFIG[payment.currentStatus] ?? STATUS_CONFIG.PENDING) : null;
+
   return (
     <DashboardLayout>
-      <div style={{ padding: '20px', ...TEXT_BASE }}>
-        <h2 style={{ marginBottom: '24px', fontWeight: 700 }}>Gestión de Pagos</h2>
+      <div style={{ padding: '24px', fontFamily: "'Montserrat', sans-serif", color: '#fff', maxWidth: '560px' }}>
+        <h2 style={{ fontWeight: 800, marginBottom: '24px', fontSize: '20px' }}>Pago de Inscripción</h2>
 
-        {/* Tabla de Torneos */}
-        <div style={{
-          background: 'rgba(0,0,0,0.5)',
-          borderRadius: '16px',
-          border: '1px solid rgba(255,255,255,0.15)',
-          padding: '20px'
-        }}>
-          {listaTorneos.map((torneo) => (
-            <div key={torneo.id} style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '16px',
-              borderBottom: '1px solid rgba(255,255,255,0.1)',
-            }}>
-              <span style={{ fontWeight: 600 }}>{torneo.nombre}</span>
-              <button
-                style={OVAL_BUTTON}
-                onClick={() => abrirPago(torneo)}
-                onMouseOver={(e) => (e.currentTarget.style.opacity = '0.9')}
-                onMouseOut={(e) => (e.currentTarget.style.opacity = '1')}
-              >
-                Pagar Inscripción
-              </button>
-            </div>
-          ))}
-        </div>
-
-        {/* Modal de Pago (Réplica exacta) */}
-        {isModalOpen && torneoSeleccionado && (
+        {/* Estado actual si ya hay pago */}
+        {!loading && payment && (
           <div style={{
-            position: 'fixed', inset: 0,
-            backgroundColor: 'rgba(0,0,0,0.8)',
-            display: 'flex', justifyContent: 'center', alignItems: 'center',
-            zIndex: 1000, backdropFilter: 'blur(5px)'
+            background: 'rgba(0,0,0,0.3)',
+            border: `1px solid ${statusInfo!.color}55`,
+            borderRadius: '14px',
+            padding: '16px 20px',
+            marginBottom: '24px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
           }}>
-            <div style={{
-              background: '#f8f9fa',
+            <div>
+              <p style={{ margin: 0, fontSize: '11px', color: 'rgba(255,255,255,0.5)', fontFamily: "'Inter', sans-serif" }}>
+                Comprobante enviado
+              </p>
+              <p style={{ margin: '4px 0 0', fontWeight: 700, fontSize: '14px' }}>{payment.teamName}</p>
+            </div>
+            <span style={{
+              background: `${statusInfo!.color}22`,
+              color: statusInfo!.color,
+              border: `1px solid ${statusInfo!.color}55`,
               borderRadius: '20px',
-              width: '450px',
-              maxHeight: '90vh',
-              overflowY: 'auto',
-              padding: '30px',
-              color: '#333',
-              position: 'relative'
+              padding: '6px 16px',
+              fontSize: '12px',
+              fontWeight: 700,
             }}>
-              {/* Botón Cerrar */}
-              <button
-                onClick={() => setIsModalOpen(false)}
-                style={{ position: 'absolute', top: '15px', right: '15px', border: 'none', background: 'none', fontSize: '20px', cursor: 'pointer' }}
-              >✕</button>
+              {statusInfo!.label}
+            </span>
+          </div>
+        )}
 
-              {/* Encabezado Dinámico */}
+        {/* Advertencia sin equipo */}
+        {!loading && !teamId && (
+          <div style={{
+            background: 'rgba(255,191,0,0.1)',
+            border: '1px solid rgba(255,191,0,0.3)',
+            borderRadius: '12px',
+            padding: '14px 18px',
+            fontSize: '13px',
+            color: 'rgba(255,255,255,0.75)',
+            fontFamily: "'Inter', sans-serif",
+          }}>
+            ⚠️ Necesitas crear un equipo antes de registrar un pago.
+          </div>
+        )}
+
+        {/* Formulario */}
+        {!loading && teamId && !payment && !success && (
+          <div style={{
+            background: 'rgba(255,255,255,0.06)',
+            border: '1px solid rgba(255,255,255,0.12)',
+            borderRadius: '16px',
+            padding: '24px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '18px',
+          }}>
+            {/* Equipo */}
+            <div>
+              <label style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', letterSpacing: '0.5px', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>
+                Equipo
+              </label>
               <div style={{
-                background: '#FFBF00',
-                padding: '15px',
-                borderRadius: '12px',
-                textAlign: 'center',
+                padding: '10px 14px',
+                background: 'rgba(255,255,255,0.08)',
+                borderRadius: '10px',
+                fontSize: '14px',
+                fontWeight: 600,
+                color: '#FFBF00',
+              }}>
+                {teamName}
+              </div>
+            </div>
+
+            {/* Torneo */}
+            <div>
+              <label style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', letterSpacing: '0.5px', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>
+                Torneo *
+              </label>
+              <select
+                value={torneoId}
+                onChange={e => setTorneoId(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '10px 14px',
+                  background: 'rgba(255,255,255,0.08)',
+                  border: `1px solid ${torneoId ? 'rgba(255,191,0,0.5)' : 'rgba(255,255,255,0.15)'}`,
+                  borderRadius: '10px',
+                  color: torneoId ? '#fff' : 'rgba(255,255,255,0.4)',
+                  fontSize: '14px',
+                  fontFamily: "'Inter', sans-serif",
+                  outline: 'none',
+                }}
+              >
+                <option value="" style={{ background: '#1a1a1a' }}>Selecciona un torneo</option>
+                {torneos.map(t => (
+                  <option key={t.id} value={t.id} style={{ background: '#1a1a1a' }}>{t.name}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Comprobante */}
+            <div>
+              <label style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', letterSpacing: '0.5px', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>
+                Comprobante de pago *
+              </label>
+              <div style={{ position: 'relative' }}>
+                <input
+                  type="file"
+                  accept=".png,.jpg,.jpeg,.pdf"
+                  onChange={e => e.target.files?.[0] && setFile(e.target.files[0])}
+                  style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer', zIndex: 10 }}
+                />
+                <div style={{
+                  border: `2px dashed ${file ? '#27ae60' : 'rgba(255,255,255,0.2)'}`,
+                  borderRadius: '12px',
+                  padding: '28px',
+                  textAlign: 'center',
+                  background: 'rgba(255,255,255,0.03)',
+                }}>
+                  <p style={{ margin: 0, fontSize: '28px' }}>{file ? '✅' : '📎'}</p>
+                  <p style={{ margin: '8px 0 0', fontSize: '12px', color: file ? '#27ae60' : 'rgba(255,255,255,0.4)', fontFamily: "'Inter', sans-serif" }}>
+                    {file ? file.name : 'Toca para subir tu comprobante (PNG, JPG, PDF)'}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {error && (
+              <p style={{ margin: 0, color: '#e74c3c', fontSize: '12px', fontFamily: "'Inter', sans-serif" }}>{error}</p>
+            )}
+
+            <button
+              onClick={handleEnviar}
+              disabled={!file || !torneoId || submitting}
+              style={{
+                padding: '13px',
+                borderRadius: '25px',
+                border: 'none',
+                background: file && torneoId && !submitting ? '#FFBF00' : 'rgba(255,255,255,0.15)',
+                color: file && torneoId && !submitting ? '#000' : 'rgba(255,255,255,0.4)',
                 fontFamily: "'Montserrat', sans-serif",
                 fontWeight: 800,
-                marginBottom: '20px',
-                boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-              }}>
-                {torneoSeleccionado.nombre.toUpperCase()}
-              </div>
+                fontSize: '14px',
+                cursor: file && torneoId && !submitting ? 'pointer' : 'not-allowed',
+              }}
+            >
+              {submitting ? 'Enviando...' : 'Enviar Comprobante'}
+            </button>
+          </div>
+        )}
 
-              {/* Alerta informativa */}
-              <div style={{ backgroundColor: '#fff8e1', border: '1px solid #ffe082', padding: '12px', borderRadius: '10px', fontSize: '11px', marginBottom: '20px' }}>
-                <p>⚠️ Los pagos no se procesan dentro de la plataforma. Por favor transfiera el valor a través de <strong>NEQUI</strong> o pague en <strong>Efectivo</strong> con el coordinador y suba su recibo abajo.</p>
-              </div>
-
-              {/* Formulario */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                <label style={{ fontSize: '12px', fontWeight: 700 }}>Subir Recibo de Pago</label>
-
-                {/* ─── Área de Subida con ICONO ACTUALIZADO ─── */}
-                <div style={{ position: 'relative' }}>
-                  <input
-                    type="file"
-                    id="reciboPago"
-                    onChange={handleFileChange}
-                    accept=".png, .jpg, .jpeg, .pdf"
-                    style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer', zIndex: 10 }}
-                  />
-                  <div style={{
-                    border: '2px dashed #ccc',
-                    padding: '30px',
-                    textAlign: 'center',
-                    borderRadius: '12px',
-                    backgroundColor: '#fff',
-                    transition: 'border-color 0.2s',
-                  }}>
-                    {/* Aquí está el componente con el icono redondeado */}
-                    <div style={{ display: 'flex', justifyContent: 'center' }}>
-                      <UploadIconRounded />
-                    </div>
-
-                    <p style={{ fontSize: '11px', color: '#666', marginTop: '12px', lineHeight: '1.4' }}>
-                      Toque para subir o arrastre su recibo aquí<br/>PNG, JPG, PDF (máx 5MB)
-                    </p>
-
-                    {fileUploaded && (
-                      <p style={{ fontSize: '11px', color: '#1a73e8', marginTop: '8px', fontWeight: 600 }}>
-                        ✓ Archivo seleccionado: {fileUploaded.name}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <div>
-                  <label style={{ fontSize: '12px', fontWeight: 700 }}>Número de Referencia de Transacción</label>
-                  <input type="text" placeholder="ej., M123456" style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #ddd', marginTop: '5px' }} />
-                </div>
-
-                <div>
-                  <label style={{ fontSize: '12px', fontWeight: 700 }}>Método de Pago Utilizado</label>
-                  <select style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #ddd', marginTop: '5px' }}>
-                    <option>Seleccione un método</option>
-                    <option>Nequi</option>
-                    <option>Efectivo</option>
-                  </select>
-                </div>
-
-                <div style={{ backgroundColor: '#fff', padding: '10px', borderRadius: '8px', border: '1px solid #ddd', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ color: '#FFBF00' }}>●</span> Estado Actual: <strong>Envío Pendiente</strong>
-                </div>
-
-                {/* Botón de Enviar (activo si hay archivo) */}
-                <button
-                  style={{
-                    backgroundColor: fileUploaded ? '#e0b000' : '#e0e0e0', // Amarillo oscuro si está activo
-                    color: fileUploaded ? '#1a1a1a' : '#999',
-                    border: 'none',
-                    padding: '14px',
-                    borderRadius: '12px',
-                    fontWeight: 700,
-                    cursor: fileUploaded ? 'pointer' : 'not-allowed',
-                    marginTop: '10px',
-                    width: '100%',
-                    transition: 'background-color 0.2s',
-                    opacity: fileUploaded ? 1 : 0.7
-                  }}
-                  disabled={!fileUploaded}
-                >
-                  Enviar para Revisión
-                </button>
-                <p style={{ fontSize: '9px', textAlign: 'center', color: '#999' }}>Su pago será revisado en un plazo de 24-48 horas.</p>
-              </div>
-            </div>
+        {/* Éxito */}
+        {success && (
+          <div style={{
+            background: 'rgba(39,174,96,0.1)',
+            border: '1px solid rgba(39,174,96,0.3)',
+            borderRadius: '16px',
+            padding: '32px',
+            textAlign: 'center',
+          }}>
+            <p style={{ fontSize: '40px', margin: '0 0 12px' }}>✅</p>
+            <p style={{ fontWeight: 800, fontSize: '16px', margin: '0 0 8px' }}>Comprobante enviado</p>
+            <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)', margin: 0, fontFamily: "'Inter', sans-serif" }}>
+              Tu pago está en revisión. Recibirás confirmación en 24-48 horas.
+            </p>
           </div>
         )}
       </div>
