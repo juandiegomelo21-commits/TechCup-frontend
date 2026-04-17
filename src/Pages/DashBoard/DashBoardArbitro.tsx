@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../Components/layout/DashboardLayout';
 import silbato from '../../assets/silbato.png';
 import tarjetaAmarilla from '../../assets/tarjetaAmarilla.png';
 import tarjetaRoja from '../../assets/tarjetaRoja.png';
+import { getRefereeByIdApi } from '../../api/refereeService';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -26,14 +27,46 @@ interface Partido {
   registros: RegistroActa[];
 }
 
+const formatDateTime = (dt: string) => {
+  try {
+    const d = new Date(dt);
+    const fecha = d.toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'short' });
+    const hora = d.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', hour12: false });
+    return { fecha: fecha.charAt(0).toUpperCase() + fecha.slice(1), hora };
+  } catch {
+    return { fecha: dt, hora: '' };
+  }
+};
+
 const DashboardArbitro = () => {
   const navigate = useNavigate();
 
-  const [partidos, setPartidos] = useState<Partido[]>([
-    { id: '1', local: 'Real Madrid FC', visitante: 'Barcelona FC', fecha: 'Lunes 7 Abril', hora: '14:00', cancha: 'Cancha 1', estado: 'Pendiente', golesLocal: 0, golesVisitante: 0, registros: [{ id: Date.now(), jugador: '', tipo: 'Gol' }] },
-    { id: '2', local: 'Manchester United', visitante: 'Liverpool FC', fecha: 'Lunes 7 Abril', hora: '16:30', cancha: 'Cancha 2', estado: 'Pendiente', golesLocal: 0, golesVisitante: 0, registros: [{ id: Date.now(), jugador: '', tipo: 'Gol' }] },
-    { id: '3', local: 'Bayern Munich', visitante: 'Borussia Dortmund', fecha: 'Martes 8 Abril', hora: '18:00', cancha: 'Cancha 3', estado: 'Pendiente', golesLocal: 0, golesVisitante: 0, registros: [{ id: Date.now(), jugador: '', tipo: 'Gol' }] },
-  ]);
+  const [partidos, setPartidos] = useState<Partido[]>([]);
+
+  useEffect(() => {
+    const userId = localStorage.getItem('userId');
+    if (!userId) return;
+    getRefereeByIdApi(userId)
+      .then(referee => {
+        const mapped: Partido[] = (referee.assignedMatches ?? []).map(m => {
+          const { fecha, hora } = formatDateTime(m.dateTime);
+          return {
+            id: m.matchId,
+            local: m.localTeamName,
+            visitante: m.visitorTeamName,
+            fecha,
+            hora,
+            cancha: m.field,
+            estado: 'Pendiente' as const,
+            golesLocal: 0,
+            golesVisitante: 0,
+            registros: [{ id: Date.now(), jugador: '', tipo: 'Gol' }],
+          };
+        });
+        setPartidos(mapped);
+      })
+      .catch(() => setPartidos([]));
+  }, []);
 
   const [showModal, setShowModal] = useState(false);
   const [partidoEditando, setPartidoEditando] = useState<Partido | null>(null);
@@ -91,7 +124,7 @@ const DashboardArbitro = () => {
           <div style={{ ...card, flex: 1 }}>
             <div style={{ backgroundColor: '#FFBF00', borderRadius: '8px', padding: '7px 0', textAlign: 'center', fontWeight: 800, fontSize: '13px', color: '#000', marginBottom: '12px' }}>Tus Estadísticas</div>
             <div style={{ display: 'flex', gap: '10px' }}>
-              {[ { img: silbato, val: 28, lab: 'Partidos Pitados' }, { img: tarjetaAmarilla, val: 75, lab: 'Tarjetas Amarillas', sub: 'Prom. 2.6' }, { img: tarjetaRoja, val: 5, lab: 'Tarjetas Rojas', sub: 'Prom. 0.18' } ].map((stat, i) => (
+              {[ { img: silbato, val: partidos.length, lab: 'Partidos Asignados' }, { img: tarjetaAmarilla, val: 0, lab: 'Tarjetas Amarillas' }, { img: tarjetaRoja, val: 0, lab: 'Tarjetas Rojas' } ].map((stat, i) => (
                 <div key={i} style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.25)', borderRadius: '10px', padding: '12px 8px 10px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', border: '1px solid rgba(255,255,255,0.08)' }}>
                   <img src={stat.img} style={{ width: '36px', height: '36px', objectFit: 'contain' }} alt="" />
                   <span style={{ fontSize: '22px', fontWeight: 800, color: '#fff', lineHeight: 1 }}>{stat.val}</span>
@@ -111,12 +144,14 @@ const DashboardArbitro = () => {
         {/* ── Stats rápidas ──────────────────────────────────────────── */}
         <div style={{ ...card, display: 'flex', padding: '12px 24px' }}>
           <div style={{ flex: 1, textAlign: 'center', borderRight: '1px solid rgba(255,255,255,0.15)' }}>
-            <span style={{ display: 'block', fontSize: '22px', fontWeight: 800, color: '#FFBF00' }}>3</span>
-            <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)' }}>Partidos hoy</span>
+            <span style={{ display: 'block', fontSize: '22px', fontWeight: 800, color: '#FFBF00' }}>{partidos.length}</span>
+            <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)' }}>Partidos asignados</span>
           </div>
           <div style={{ flex: 1, textAlign: 'center' }}>
-            <span style={{ display: 'block', fontSize: '22px', fontWeight: 800, color: '#FFBF00' }}>14:00</span>
-            <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)' }}>Siguiente silbatazo</span>
+            <span style={{ display: 'block', fontSize: '22px', fontWeight: 800, color: '#FFBF00' }}>
+              {partidos[0]?.hora ?? '—'}
+            </span>
+            <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)' }}>Próximo partido</span>
           </div>
         </div>
 
@@ -129,6 +164,11 @@ const DashboardArbitro = () => {
             ))}
           </div>
           <div style={{ overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            {partidos.length === 0 && (
+              <p style={{ color: 'rgba(255,255,255,0.4)', fontFamily: "'Inter', sans-serif", fontSize: '13px', textAlign: 'center', padding: '24px 0' }}>
+                No tienes partidos asignados
+              </p>
+            )}
             {partidos.map((partido, i) => (
               <div key={partido.id} style={{ display: 'grid', gridTemplateColumns: '1.2fr 120px 100px 140px', padding: '14px 12px', alignItems: 'center', backgroundColor: i % 2 === 0 ? 'rgba(255,255,255,0.05)' : 'transparent', borderRadius: '8px' }}>
                 <span style={{ fontSize: '13px', color: '#fff', fontWeight: 500 }}>{partido.local} <span style={{ color: '#FFBF00', fontWeight: 700 }}>vs</span> {partido.visitante}</span>

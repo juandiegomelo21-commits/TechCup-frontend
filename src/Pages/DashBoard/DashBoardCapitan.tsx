@@ -1,28 +1,15 @@
 import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import DashboardLayout from '../../Components/layout/DashboardLayout';
-import Badge from '../../Components/ui/Bagde';
-import { Invitation, Player } from '../../Types';
+import { getPlayersApi, PlayerResponse } from '../../api/playerService';
+import { getTeamsApi } from '../../api/teamService';
 
-const mockPlayers: Player[] = [
-  { id: '1', name: 'Carlos Mendoza', position: 'Delantero', age: 24 },
-  { id: '2', name: 'Ana Rodríguez', position: 'Defensa', age: 22 },
-  { id: '3', name: 'Luis García', position: 'Mediocampista', age: 26 },
-  { id: '4', name: 'María López', position: 'Portera', age: 23 },
-  { id: '5', name: 'Jorge Martínez', position: 'Delantero', age: 25 },
-  { id: '6', name: 'Sofía Torres', position: 'Mediocampista', age: 21 },
-];
-
-const mockInvitations: Invitation[] = [
-  { name: 'Pedro Sánchez', date: '2026-04-05', status: 'Aceptada' },
-  { name: 'Laura Díaz', date: '2026-04-04', status: 'Pendiente' },
-  { name: 'Miguel Ruiz', date: '2026-04-03', status: 'Aceptada' },
-  { name: 'Carmen Vega', date: '2026-04-02', status: 'Rechazada' },
-  { name: 'Roberto Castro', date: '2026-04-01', status: 'Pendiente' },
-  { name: 'Isabel Moreno', date: '2026-03-31', status: 'Aceptada' },
-];
-
-const currentPlayers = 12;
-const maxPlayers = 20;
+const positionLabel: Record<string, string> = {
+  GoalKeeper: 'Portero',
+  Defender: 'Defensa',
+  Midfielder: 'Mediocampista',
+  Winger: 'Extremo',
+};
 
 const thStyle: React.CSSProperties = {
   fontFamily: "'Inter', sans-serif",
@@ -43,6 +30,24 @@ const tdStyle: React.CSSProperties = {
 
 const DashboardCapitan = () => {
   const navigate = useNavigate();
+  const [availablePlayers, setAvailablePlayers] = useState<PlayerResponse[]>([]);
+  const [currentPlayers, setCurrentPlayers] = useState(0);
+  const maxPlayers = 20;
+
+  useEffect(() => {
+    const userId = localStorage.getItem('userId') ?? '';
+    getPlayersApi()
+      .then(data => setAvailablePlayers(data.filter(p => p.disponible && !p.haveTeam && p.id !== userId)))
+      .catch(() => setAvailablePlayers([]));
+    if (userId) {
+      getTeamsApi()
+        .then(teams => {
+          const myTeam = teams.find(t => t.players.includes(userId));
+          if (myTeam) setCurrentPlayers(myTeam.players.length);
+        })
+        .catch(() => {});
+    }
+  }, []);
 
   return (
     <DashboardLayout>
@@ -236,22 +241,22 @@ const DashboardCapitan = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {mockPlayers.map((p) => (
+                  {availablePlayers.length === 0 ? (
+                    <tr>
+                      <td colSpan={4} style={{ ...tdStyle, textAlign: 'center', opacity: 0.5, padding: '20px' }}>
+                        No hay jugadores disponibles
+                      </td>
+                    </tr>
+                  ) : availablePlayers.map((p) => (
                     <tr key={p.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-                      <td style={tdStyle}>{p.name}</td>
-                      <td style={tdStyle}>{p.position}</td>
+                      <td style={tdStyle}>{p.fullname}</td>
+                      <td style={tdStyle}>{positionLabel[p.position] ?? p.position}</td>
                       <td style={{ ...tdStyle, textAlign: 'center' }}>{p.age}</td>
                       <td style={{ ...tdStyle, textAlign: 'center' }}>
                         <button style={{
-                          backgroundColor: '#FFBF00',
-                          border: 'none',
-                          borderRadius: '6px',
-                          padding: '4px 12px',
-                          fontFamily: "'Montserrat', sans-serif",
-                          fontWeight: 'bold',
-                          fontSize: '11px',
-                          color: '#000',
-                          cursor: 'pointer',
+                          backgroundColor: '#FFBF00', border: 'none', borderRadius: '6px',
+                          padding: '4px 12px', fontFamily: "'Montserrat', sans-serif",
+                          fontWeight: 'bold', fontSize: '11px', color: '#000', cursor: 'pointer',
                         }}>
                           Invitar
                         </button>
@@ -282,29 +287,10 @@ const DashboardCapitan = () => {
               Invitaciones Enviadas
             </div>
 
-            <div style={{ overflowY: 'auto', flex: 1, padding: '8px' }}>
-              {mockInvitations.map((inv, i) => (
-                <div
-                  key={i}
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    padding: '8px 10px',
-                    borderBottom: '1px solid rgba(255,255,255,0.08)',
-                  }}
-                >
-                  <div>
-                    <p style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 'bold', fontSize: '13px', color: '#fff', margin: 0 }}>
-                      {inv.name}
-                    </p>
-                    <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '11px', color: 'rgba(255,255,255,0.4)', margin: '2px 0 0 0' }}>
-                      {inv.date}
-                    </p>
-                  </div>
-                  <Badge status={inv.status} />
-                </div>
-              ))}
+            <div style={{ overflowY: 'auto', flex: 1, padding: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '12px', color: 'rgba(255,255,255,0.4)', textAlign: 'center' }}>
+                Sin invitaciones enviadas aún
+              </p>
             </div>
           </div>
 

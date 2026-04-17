@@ -1,42 +1,50 @@
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logo from '../assets/Logo.png';
 import campoFutbol from '../assets/campoFutbol.png';
+import { getPlayerByIdApi, PlayerResponse } from '../api/playerService';
+import apiClient from '../api/axiosInstance';
 
-interface Player {
-  name: string;
-  roles: string[];
-  fullName: string;
-  nationalId: string;
-  email: string;
-  preferredPosition: string;
-  jerseyNumber: number;
-  accountType: string;
-  available: boolean;
-  matchesPlayed: number;
-  goalsScored: number;
-}
-
-const roleColors: Record<string, { bg: string; text: string }> = {
-  Player: { bg: '#4FC3F7', text: '#0D47A1' },
-  Student: { bg: '#CE93D8', text: '#4A148C' },
+const positionLabel: Record<string, string> = {
+  GoalKeeper: 'Portero',
+  Defender: 'Defensa',
+  Midfielder: 'Mediocampista',
+  Winger: 'Extremo',
 };
+
+interface PlayerStats {
+  matchesPlayed: number;
+  goals: number;
+}
 
 const PlayerProfilePage = () => {
   const navigate = useNavigate();
+  const [player, setPlayer] = useState<PlayerResponse | null>(null);
+  const [stats, setStats] = useState<PlayerStats>({ matchesPlayed: 0, goals: 0 });
+  const [loading, setLoading] = useState(true);
 
-  const player: Player = {
-    name: 'Carlos Rodríguez',
-    roles: ['Player', 'Student'],
-    fullName: 'Carlos Rodríguez',
-    nationalId: '1234567890',
-    email: 'carlos.rodriguez@university.edu.co',
-    preferredPosition: 'Volante (Midfielder)',
-    jerseyNumber: 10,
-    accountType: 'Student',
-    available: true,
-    matchesPlayed: 0,
-    goalsScored: 0,
-  };
+  useEffect(() => {
+    const userId = localStorage.getItem('userId');
+    if (!userId) { navigate('/login'); return; }
+
+    Promise.all([
+      getPlayerByIdApi(userId),
+      apiClient.get<PlayerStats>(`/api/players/${userId}/stats`).then(r => r.data).catch(() => ({ matchesPlayed: 0, goals: 0 })),
+    ])
+      .then(([p, s]) => { setPlayer(p); setStats(s); })
+      .catch(() => navigate('/login'))
+      .finally(() => setLoading(false));
+  }, [navigate]);
+
+  if (loading) {
+    return (
+      <div style={{ width: '100vw', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#00674F', color: '#fff', fontFamily: "'Inter', sans-serif" }}>
+        Cargando perfil...
+      </div>
+    );
+  }
+
+  if (!player) return null;
 
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden', display: 'flex' }}>
@@ -59,14 +67,15 @@ const PlayerProfilePage = () => {
 
         <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '2px', padding: '0 12px' }}>
           {[
-            { label: 'Panel Principal' },
-            { label: 'Mis Equipos' },
-            { label: 'Pagos'},
-            { label: 'Mercado'},
-            { label: 'Historial'},
+            { label: 'Panel Principal', path: '/dashboard' },
+            { label: 'Mis Equipos', path: '/equipo' },
+            { label: 'Pagos', path: '/pagos' },
+            { label: 'Mercado', path: '/mercado' },
+            { label: 'Historial', path: '/historial' },
           ].map((item) => (
             <button
               key={item.label}
+              onClick={() => navigate(item.path)}
               style={{
                 display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 10px',
                 borderRadius: '8px', border: 'none', background: 'transparent',
@@ -74,7 +83,6 @@ const PlayerProfilePage = () => {
                 cursor: 'pointer', textAlign: 'left', width: '100%',
               }}
             >
-              <span style={{ fontSize: '13px' }}>{item.icon}</span>
               {item.label}
             </button>
           ))}
@@ -82,13 +90,11 @@ const PlayerProfilePage = () => {
 
         <div style={{ padding: '0 12px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
           {[
-            { label: 'Preguntas Frecuentes'},
-            { label: 'Aprende con nosotros'},
-            { label: 'Cerrar Sesion'},
+            { label: 'Cerrar Sesion', path: '/login' },
           ].map((item) => (
             <button
               key={item.label}
-              onClick={item.label === 'Cerrar Sesión' ? () => navigate('/login') : undefined}
+              onClick={() => { localStorage.clear(); navigate(item.path); }}
               style={{
                 display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 10px',
                 borderRadius: '8px', border: 'none', background: 'transparent',
@@ -96,7 +102,6 @@ const PlayerProfilePage = () => {
                 cursor: 'pointer', textAlign: 'left', width: '100%', opacity: 0.85,
               }}
             >
-              <span style={{ fontSize: '13px' }}>{item.icon}</span>
               {item.label}
             </button>
           ))}
@@ -115,28 +120,15 @@ const PlayerProfilePage = () => {
               </div>
               <div>
                 <p style={{ margin: '0 0 5px 0', fontFamily: "'Inter', sans-serif", fontSize: '16px', fontWeight: 700, color: '#1a1a1a' }}>
-                  {player.name}
+                  {player.fullname}
                 </p>
                 <div style={{ display: 'flex', gap: '5px' }}>
-                  {player.roles.map((role) => (
-                    <span
-                      key={role}
-                      style={{
-                        backgroundColor: roleColors[role]?.bg ?? '#ddd',
-                        color: roleColors[role]?.text ?? '#333',
-                        borderRadius: '20px', padding: '2px 10px',
-                        fontSize: '10px', fontFamily: "'Inter', sans-serif", fontWeight: 600,
-                      }}
-                    >
-                      {role}
-                    </span>
-                  ))}
+                  <span style={{ backgroundColor: '#4FC3F7', color: '#0D47A1', borderRadius: '20px', padding: '2px 10px', fontSize: '10px', fontFamily: "'Inter', sans-serif", fontWeight: 600 }}>
+                    Jugador
+                  </span>
                 </div>
               </div>
             </div>
-            <button style={{ display: 'flex', alignItems: 'center', gap: '5px', backgroundColor: 'rgba(255,255,255,0.5)', border: '1px solid rgba(0,0,0,0.15)', borderRadius: '6px', padding: '5px 10px', fontSize: '11px', fontFamily: "'Inter', sans-serif", cursor: 'pointer', color: '#1a1a1a', fontWeight: 500 }}>
-              Editar Perfil
-            </button>
           </div>
 
           {/* Cuerpo */}
@@ -147,56 +139,64 @@ const PlayerProfilePage = () => {
 
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', gap: '12px' }}>
               <div style={{ flex: 1 }}>
-                <p style={{ margin: '0 0 2px 0', fontSize: '9px', color: '#999', fontFamily: "'Inter', sans-serif", textTransform: 'uppercase', letterSpacing: '0.05em' }}>FULL NAME</p>
-                <p style={{ margin: 0, fontSize: '12px', color: '#333', fontFamily: "'Inter', sans-serif" }}>{player.fullName}</p>
+                <p style={{ margin: '0 0 2px 0', fontSize: '9px', color: '#999', fontFamily: "'Inter', sans-serif", textTransform: 'uppercase', letterSpacing: '0.05em' }}>NOMBRE COMPLETO</p>
+                <p style={{ margin: 0, fontSize: '12px', color: '#333', fontFamily: "'Inter', sans-serif" }}>{player.fullname}</p>
               </div>
               <div style={{ flex: 1 }}>
-                <p style={{ margin: '0 0 2px 0', fontSize: '9px', color: '#999', fontFamily: "'Inter', sans-serif", textTransform: 'uppercase', letterSpacing: '0.05em' }}>NATIONAL ID</p>
-                <p style={{ margin: 0, fontSize: '12px', color: '#333', fontFamily: "'Inter', sans-serif" }}>🪪 {player.nationalId}</p>
+                <p style={{ margin: '0 0 2px 0', fontSize: '9px', color: '#999', fontFamily: "'Inter', sans-serif", textTransform: 'uppercase', letterSpacing: '0.05em' }}>EDAD</p>
+                <p style={{ margin: 0, fontSize: '12px', color: '#333', fontFamily: "'Inter', sans-serif" }}>{player.age} años</p>
               </div>
             </div>
 
             <div style={{ marginBottom: '16px' }}>
-              <p style={{ margin: '0 0 2px 0', fontSize: '9px', color: '#999', fontFamily: "'Inter', sans-serif", textTransform: 'uppercase', letterSpacing: '0.05em' }}>EMAIL ADDRESS</p>
+              <p style={{ margin: '0 0 2px 0', fontSize: '9px', color: '#999', fontFamily: "'Inter', sans-serif", textTransform: 'uppercase', letterSpacing: '0.05em' }}>EMAIL</p>
               <p style={{ margin: 0, fontSize: '12px', color: '#333', fontFamily: "'Inter', sans-serif" }}>✉️ {player.email}</p>
             </div>
 
             <div style={{ height: '1px', backgroundColor: '#eee', margin: '0 0 14px 0' }} />
 
             <p style={{ margin: '0 0 10px 0', fontFamily: "'Inter', sans-serif", fontSize: '12px', fontWeight: 700, color: '#555' }}>
-               Perfil Deportivo
+              Perfil Deportivo
             </p>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', gap: '12px', alignItems: 'flex-start' }}>
               <div style={{ flex: 1 }}>
-                <p style={{ margin: '0 0 2px 0', fontSize: '9px', color: '#999', fontFamily: "'Inter', sans-serif", textTransform: 'uppercase', letterSpacing: '0.05em' }}>PREFERRED POSITION</p>
-                <p style={{ margin: 0, fontSize: '12px', color: '#333', fontFamily: "'Inter', sans-serif" }}>📍 {player.preferredPosition}</p>
+                <p style={{ margin: '0 0 2px 0', fontSize: '9px', color: '#999', fontFamily: "'Inter', sans-serif", textTransform: 'uppercase', letterSpacing: '0.05em' }}>POSICIÓN</p>
+                <p style={{ margin: 0, fontSize: '12px', color: '#333', fontFamily: "'Inter', sans-serif" }}>📍 {positionLabel[player.position] ?? player.position}</p>
               </div>
               <div>
-                <p style={{ margin: '0 0 4px 0', fontSize: '9px', color: '#999', fontFamily: "'Inter', sans-serif", textTransform: 'uppercase', letterSpacing: '0.05em' }}>JERSEY NUMBER</p>
+                <p style={{ margin: '0 0 4px 0', fontSize: '9px', color: '#999', fontFamily: "'Inter', sans-serif", textTransform: 'uppercase', letterSpacing: '0.05em' }}>DORSAL</p>
                 <div style={{ width: '32px', height: '32px', backgroundColor: '#F5C518', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Inter', sans-serif", fontSize: '14px', fontWeight: 800, color: '#1a1a1a' }}>
-                  {player.jerseyNumber}
+                  {player.dorsalNumber}
                 </div>
               </div>
             </div>
 
-            <div style={{ marginBottom: '16px' }}>
-              <p style={{ margin: '0 0 2px 0', fontSize: '9px', color: '#999', fontFamily: "'Inter', sans-serif", textTransform: 'uppercase', letterSpacing: '0.05em' }}>ACCOUNT TYPE</p>
-              <p style={{ margin: 0, fontSize: '12px', color: '#333', fontFamily: "'Inter', sans-serif" }}>{player.accountType}</p>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px', gap: '12px' }}>
+              <div style={{ flex: 1 }}>
+                <p style={{ margin: '0 0 2px 0', fontSize: '9px', color: '#999', fontFamily: "'Inter', sans-serif", textTransform: 'uppercase', letterSpacing: '0.05em' }}>GÉNERO</p>
+                <p style={{ margin: 0, fontSize: '12px', color: '#333', fontFamily: "'Inter', sans-serif" }}>{player.gender === 'M' ? 'Masculino' : player.gender === 'F' ? 'Femenino' : player.gender}</p>
+              </div>
+              {player.semester > 0 && (
+                <div style={{ flex: 1 }}>
+                  <p style={{ margin: '0 0 2px 0', fontSize: '9px', color: '#999', fontFamily: "'Inter', sans-serif", textTransform: 'uppercase', letterSpacing: '0.05em' }}>SEMESTRE</p>
+                  <p style={{ margin: 0, fontSize: '12px', color: '#333', fontFamily: "'Inter', sans-serif" }}>Semestre {player.semester}</p>
+                </div>
+              )}
             </div>
 
             <div style={{ display: 'flex', gap: '8px' }}>
-              <button style={{ flex: 1, padding: '10px 8px', backgroundColor: '#4CAF50', color: '#ffffff', border: 'none', borderRadius: '8px', fontFamily: "'Inter', sans-serif", fontSize: '12px', fontWeight: 700, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
-                Disponible
-                <span style={{ fontSize: '9px', fontWeight: 400, opacity: 0.85 }}>Disponible para Equipos</span>
+              <button style={{ flex: 1, padding: '10px 8px', backgroundColor: player.disponible ? '#4CAF50' : '#9E9E9E', color: '#ffffff', border: 'none', borderRadius: '8px', fontFamily: "'Inter', sans-serif", fontSize: '12px', fontWeight: 700, cursor: 'default', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
+                {player.disponible ? 'Disponible' : 'No Disponible'}
+                <span style={{ fontSize: '9px', fontWeight: 400, opacity: 0.85 }}>Estado en mercado</span>
               </button>
               <button style={{ flex: 1, padding: '10px 8px', backgroundColor: '#F5C518', color: '#1a1a1a', border: 'none', borderRadius: '8px', fontFamily: "'Inter', sans-serif", fontSize: '12px', fontWeight: 700, cursor: 'default', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
-                {player.matchesPlayed}
-                <span style={{ fontSize: '9px', fontWeight: 400 }}>Matches Played</span>
+                {stats.matchesPlayed}
+                <span style={{ fontSize: '9px', fontWeight: 400 }}>Partidos Jugados</span>
               </button>
               <button style={{ flex: 1, padding: '10px 8px', backgroundColor: '#4FC3F7', color: '#0D47A1', border: 'none', borderRadius: '8px', fontFamily: "'Inter', sans-serif", fontSize: '12px', fontWeight: 700, cursor: 'default', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
-                {player.goalsScored}
-                <span style={{ fontSize: '9px', fontWeight: 400 }}>Goals Scored</span>
+                {stats.goals}
+                <span style={{ fontSize: '9px', fontWeight: 400 }}>Goles</span>
               </button>
             </div>
           </div>

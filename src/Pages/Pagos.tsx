@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
-import DashboardLayout from '../Components/layout/DashboardLayout'; // Ruta corregida
+import React, { useState, useEffect } from 'react';
+import DashboardLayout from '../Components/layout/DashboardLayout';
+import { getTournamentsApi } from '../api/tournamentService';
 
 // ─── Tipos ─────────────────────────────────────────────────────────────────────
 interface TorneoPago {
-  id: number;
+  id: string;
   nombre: string;
   estado: 'Pendiente' | 'Pagado';
 }
@@ -45,13 +46,14 @@ const UploadIconRounded = () => (
 const Pagos = () => {
   const [torneoSeleccionado, setTorneoSeleccionado] = useState<TorneoPago | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [fileUploaded, setFileUploaded] = useState<File | null>(null); // Estado para el archivo subido
+  const [fileUploaded, setFileUploaded] = useState<File | null>(null);
+  const [listaTorneos, setListaTorneos] = useState<TorneoPago[]>([]);
 
-  const listaTorneos: TorneoPago[] = [
-    { id: 1, nombre: 'Copa Universitaria 2026', estado: 'Pendiente' },
-    { id: 2, nombre: 'Torneo Relámpago Bogotá', estado: 'Pendiente' },
-    { id: 3, nombre: 'Liga TechUp Elite', estado: 'Pendiente' },
-  ];
+  useEffect(() => {
+    getTournamentsApi()
+      .then(data => setListaTorneos(data.map(t => ({ id: t.id, nombre: t.name, estado: 'Pendiente' as const }))))
+      .catch(() => setListaTorneos([]));
+  }, []);
 
   const abrirPago = (torneo: TorneoPago) => {
     setTorneoSeleccionado(torneo);

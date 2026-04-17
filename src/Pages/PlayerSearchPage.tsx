@@ -1,34 +1,31 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import DashboardLayout from '../Components/layout/DashboardLayout';
+import { getPlayersApi, PlayerResponse } from '../api/playerService';
+
+const positionLabel: Record<string, string> = {
+  GoalKeeper: 'Portero',
+  Defender: 'Defensa',
+  Midfielder: 'Mediocampista',
+  Winger: 'Delantero',
+};
 
 interface Player {
-  id: number;
+  id: string;
   name: string;
-  username: string;
   edad: number;
   posicion: string;
   sexo: string;
   semestre: number;
 }
 
-const mockPlayers: Player[] = [
-  { id: 1,  name: 'Vanessa Torres',   username: '', edad: 20, posicion: 'Delantero',    sexo: 'F', semestre: 3 },
-  { id: 2,  name: 'Daniel Pinilla',   username: '', edad: 22, posicion: 'Defensa',       sexo: 'M', semestre: 5 },
-  { id: 3,  name: 'Shadday Correa',   username: '', edad: 19, posicion: 'Mediocampista', sexo: 'M', semestre: 2 },
-  { id: 4,  name: 'Nicolas Sanchez',  username: '', edad: 23, posicion: 'Portero',       sexo: 'M', semestre: 7 },
-  { id: 5,  name: 'Maria Jose Perez', username: '', edad: 19, posicion: 'Mediocampista', sexo: 'F', semestre: 2 },
-  { id: 6,  name: 'Adrian Ducuara',   username: '', edad: 23, posicion: 'Portero',       sexo: 'M', semestre: 7 },
-  { id: 7,  name: 'Juan David Mejia', username: '', edad: 21, posicion: 'Defensa',       sexo: 'M', semestre: 4 },
-  { id: 8,  name: 'Andres Pineda',    username: '', edad: 24, posicion: 'Delantero',     sexo: 'M', semestre: 6 },
-  { id: 9,  name: 'Mariana Malagon',  username: '', edad: 20, posicion: 'Mediocampista', sexo: 'F', semestre: 3 },
-  { id: 10, name: 'Andres Cantor',    username: '', edad: 22, posicion: 'Defensa',       sexo: 'M', semestre: 5 },
-  { id: 11, name: 'Rodrigo Martinez', username: '', edad: 20, posicion: 'Mediocampista', sexo: 'M', semestre: 3 },
-  { id: 12, name: 'Javier Romero',    username: '', edad: 22, posicion: 'Defensa',       sexo: 'M', semestre: 5 },
-  { id: 13, name: 'Juan Tellez',      username: '', edad: 20, posicion: 'Mediocampista', sexo: 'M', semestre: 3 },
-  { id: 14, name: 'Ronaldo Mejia',    username: '', edad: 22, posicion: 'Defensa',       sexo: 'M', semestre: 5 },
-  { id: 15, name: 'David Cajamarca',  username: '', edad: 20, posicion: 'Mediocampista', sexo: 'M', semestre: 3 },
-  { id: 16, name: 'Juan Diego Melo',  username: '', edad: 22, posicion: 'Defensa',       sexo: 'M', semestre: 5 },
-];
+const mapPlayer = (p: PlayerResponse): Player => ({
+  id: p.id,
+  name: p.fullname,
+  edad: p.age,
+  posicion: positionLabel[p.position] ?? p.position,
+  sexo: p.gender,
+  semestre: p.semester,
+});
 
 const posiciones = ['Delantero', 'Mediocampista', 'Defensa', 'Portero'];
 
@@ -51,12 +48,19 @@ const PlayerSearchPage = () => {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [openSection, setOpenSection] = useState<string | null>(null);
   const [filters, setFilters] = useState<Filters>({ edad: '', semestre: '', posicion: '', sexo: '' });
+  const [players, setPlayers] = useState<Player[]>([]);
+
+  useEffect(() => {
+    getPlayersApi()
+      .then(data => setPlayers(data.map(mapPlayer)))
+      .catch(() => setPlayers([]));
+  }, []);
 
   const toggleSection = (s: string) => setOpenSection(p => p === s ? null : s);
   const setFilter = (key: keyof Filters, value: string) =>
     setFilters(p => ({ ...p, [key]: p[key] === value ? '' : value }));
 
-  const filtered = mockPlayers.filter(p => {
+  const filtered = players.filter(p => {
     const matchSearch   = search === '' || p.name.toLowerCase().includes(search.toLowerCase());
     const matchEdad     = filters.edad === ''     || p.edad === Number(filters.edad);
     const matchSemestre = filters.semestre === '' || p.semestre === Number(filters.semestre);

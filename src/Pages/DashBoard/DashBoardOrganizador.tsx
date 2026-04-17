@@ -1,5 +1,8 @@
 import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import DashboardLayout from '../../Components/layout/DashboardLayout';
+import { getTeamsApi, TeamResponse } from '../../api/teamService';
+import { getTournamentsApi, TournamentResponse } from '../../api/tournamentService';
 
 
 const IconCrearTorneo = () => (
@@ -34,25 +37,7 @@ const IconFinalizarTorneo = () => (
   </svg>
 );
 
-// ── Tipos y datos mock ──────────────────────────────────────────────────────
-
-interface EquipoInscrito {
-  id: string;
-  siglas: string;
-  nombre: string;
-  capitan: string;
-  jugadores: string;
-  color: string;
-}
-
-const equiposMock: EquipoInscrito[] = [
-  { id: '1', siglas: 'FC', nombre: 'FC Barcelona Universitario', capitan: 'Carlos Martínez', jugadores: '18/22', color: '#e74c3c' },
-  { id: '2', siglas: 'RM', nombre: 'Real Madrid Académico',      capitan: 'Ana López',       jugadores: '20/22', color: '#27ae60' },
-  { id: '3', siglas: 'AM', nombre: 'Atlético Madrid Campus',     capitan: 'Diego Fernández', jugadores: '15/22', color: '#e67e22' },
-  { id: '4', siglas: 'SE', nombre: 'Sevilla FC Estudiantil',     capitan: 'María Sánchez',   jugadores: '19/22', color: '#8e44ad' },
-  { id: '5', siglas: 'VL', nombre: 'Valencia CF Universidad',    capitan: 'Javier Gómez',    jugadores: '17/22', color: '#2980b9' },
-  { id: '6', siglas: 'BT', nombre: 'Real Betis Académica',       capitan: 'Laura Rodríguez', jugadores: '21/22', color: '#16a085' },
-];
+const TEAM_COLORS = ['#e74c3c', '#27ae60', '#e67e22', '#8e44ad', '#2980b9', '#16a085', '#c0392b', '#1abc9c'];
 
 const accesos = [
   { label: 'Crear Torneo',      icon: <IconCrearTorneo />,      path: '/torneo/crear' },
@@ -65,6 +50,15 @@ const accesos = [
 
 const DashboardOrganizador = () => {
   const navigate = useNavigate();
+  const [equipos, setEquipos] = useState<TeamResponse[]>([]);
+  const [torneo, setTorneo] = useState<TournamentResponse | null>(null);
+
+  useEffect(() => {
+    getTeamsApi().then(setEquipos).catch(() => setEquipos([]));
+    getTournamentsApi()
+      .then(data => setTorneo(data.find(t => t.currentState === 'ACTIVE' || t.currentState === 'IN_PROGRESS') ?? data[0] ?? null))
+      .catch(() => setTorneo(null));
+  }, []);
 
   const card: React.CSSProperties = {
     backgroundColor: 'rgba(255,255,255,0.10)',
@@ -97,7 +91,7 @@ const DashboardOrganizador = () => {
               fontFamily: "'Montserrat', sans-serif",
               letterSpacing: '-0.3px',
             }}>
-              Copa Universitaria 2026
+              {torneo?.name ?? 'Sin torneo activo'}
             </h1>
             <span style={{
               backgroundColor: '#FFBF00',
@@ -109,7 +103,7 @@ const DashboardOrganizador = () => {
               letterSpacing: '0.5px',
               textTransform: 'uppercase',
             }}>
-              Fase de Grupos
+              {torneo?.currentState ?? '—'}
             </span>
           </div>
 
@@ -211,68 +205,61 @@ const DashboardOrganizador = () => {
 
           {/* Filas */}
           <div style={{ overflowY: 'auto', flex: 1 }}>
-            {equiposMock.map((equipo, i) => (
-              <div
-                key={equipo.id}
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: colWidths,
-                  padding: '11px 10px',
-                  alignItems: 'center',
-                  backgroundColor: i % 2 === 0 ? 'rgba(255,255,255,0.04)' : 'transparent',
-                  borderRadius: '8px',
-                  transition: 'background 0.15s',
-                }}
-                onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'rgba(255,191,0,0.08)')}
-                onMouseLeave={e => (e.currentTarget.style.backgroundColor = i % 2 === 0 ? 'rgba(255,255,255,0.04)' : 'transparent')}
-              >
-                <div style={{
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '50%',
-                  backgroundColor: equipo.color,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontWeight: 800,
-                  fontSize: '11px',
-                  color: '#fff',
-                  fontFamily: "'Montserrat', sans-serif",
-                }}>
-                  {equipo.siglas}
-                </div>
-
-                <span style={{ fontSize: '13px', color: '#fff', fontWeight: 500 }}>
-                  {equipo.nombre}
-                </span>
-
-                <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.75)' }}>
-                  {equipo.capitan}
-                </span>
-
-                <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.75)' }}>
-                  {equipo.jugadores}
-                </span>
-
-                <button
-                  onClick={() => navigate(`/equipo/${equipo.id}`)}
+            {equipos.length === 0 ? (
+              <p style={{ color: 'rgba(255,255,255,0.5)', fontFamily: "'Inter', sans-serif", fontSize: '13px', textAlign: 'center', padding: '24px' }}>
+                No hay equipos inscritos aún
+              </p>
+            ) : equipos.map((equipo, i) => {
+              const siglas = equipo.teamName.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+              const color = TEAM_COLORS[i % TEAM_COLORS.length];
+              return (
+                <div
+                  key={equipo.id}
                   style={{
-                    backgroundColor: '#FFBF00',
-                    color: '#000',
-                    border: 'none',
-                    borderRadius: '20px',
-                    padding: '6px 16px',
-                    fontSize: '11px',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    fontFamily: "'Inter', sans-serif",
-                    whiteSpace: 'nowrap',
+                    display: 'grid',
+                    gridTemplateColumns: colWidths,
+                    padding: '11px 10px',
+                    alignItems: 'center',
+                    backgroundColor: i % 2 === 0 ? 'rgba(255,255,255,0.04)' : 'transparent',
+                    borderRadius: '8px',
+                    transition: 'background 0.15s',
                   }}
+                  onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'rgba(255,191,0,0.08)')}
+                  onMouseLeave={e => (e.currentTarget.style.backgroundColor = i % 2 === 0 ? 'rgba(255,255,255,0.04)' : 'transparent')}
                 >
-                  Ver Detalles
-                </button>
-              </div>
-            ))}
+                  <div style={{
+                    width: '36px', height: '36px', borderRadius: '50%', backgroundColor: color,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontWeight: 800, fontSize: '11px', color: '#fff', fontFamily: "'Montserrat', sans-serif",
+                  }}>
+                    {siglas}
+                  </div>
+
+                  <span style={{ fontSize: '13px', color: '#fff', fontWeight: 500 }}>
+                    {equipo.teamName}
+                  </span>
+
+                  <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.75)' }}>
+                    {equipo.captainName}
+                  </span>
+
+                  <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.75)' }}>
+                    {equipo.players.length}
+                  </span>
+
+                  <button
+                    onClick={() => navigate(`/equipo/${equipo.id}`)}
+                    style={{
+                      backgroundColor: '#FFBF00', color: '#000', border: 'none',
+                      borderRadius: '20px', padding: '6px 16px', fontSize: '11px',
+                      fontWeight: 700, cursor: 'pointer', fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap',
+                    }}
+                  >
+                    Ver Detalles
+                  </button>
+                </div>
+              );
+            })}
           </div>
         </div>
 
