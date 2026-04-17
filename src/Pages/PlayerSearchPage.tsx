@@ -47,6 +47,9 @@ const colPosicion: Record<string, string> = {
 };
 
 const PlayerSearchPage = () => {
+  const rol = localStorage.getItem('rol');
+  const esCapitan = rol === 'capitan';
+
   const [search, setSearch] = useState('');
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [openSection, setOpenSection] = useState<string | null>(null);
@@ -294,15 +297,17 @@ const PlayerSearchPage = () => {
                     </div>
                   </div>
 
-                  {/* Botón invitar */}
-                  <button
-                    title="Invitar al equipo"
-                    style={{ backgroundColor: '#FFBF00', border: 'none', borderRadius: '20px', padding: '5px 12px', cursor: 'pointer', flexShrink: 0, fontFamily: "'Inter', sans-serif", fontSize: '10px', fontWeight: 700, color: '#000', transition: 'all 0.15s' }}
-                    onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#e6ac00'; }}
-                    onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#FFBF00'; }}
-                  >
-                    Invitar
-                  </button>
+                  {/* Botón invitar — solo capitán */}
+                  {esCapitan && (
+                    <button
+                      title="Invitar al equipo"
+                      style={{ backgroundColor: '#FFBF00', border: 'none', borderRadius: '20px', padding: '5px 12px', cursor: 'pointer', flexShrink: 0, fontFamily: "'Inter', sans-serif", fontSize: '10px', fontWeight: 700, color: '#000', transition: 'all 0.15s' }}
+                      onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#e6ac00'; }}
+                      onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#FFBF00'; }}
+                    >
+                      Invitar
+                    </button>
+                  )}
                 </div>
               );
             })
