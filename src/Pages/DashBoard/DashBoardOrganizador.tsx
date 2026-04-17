@@ -118,7 +118,7 @@ const DashboardOrganizador = () => {
               color: '#000',
               cursor: 'pointer',
             }}
-            onClick={() => navigate('/perfil')}
+            onClick={() => navigate('/admin-profile')}
           >
             Perfil
           </div>

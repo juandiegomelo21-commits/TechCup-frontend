@@ -157,7 +157,7 @@ const DashboardCapitan = () => {
               flex: 1,
             }}>
               <button
-                onClick={() => navigate('/perfil')}
+                onClick={() => navigate('/player-profile')}
                 style={{
                   backgroundColor: '#FFBF00',
                   border: 'none',

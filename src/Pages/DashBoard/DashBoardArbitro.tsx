@@ -136,7 +136,7 @@ const DashboardArbitro = () => {
           </div>
 
           <div style={{ ...card, width: '160px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', padding: '14px 12px' }}>
-            <div style={{ backgroundColor: '#FFBF00', borderRadius: '8px', padding: '7px 0', textAlign: 'center', fontWeight: 800, fontSize: '13px', color: '#000', width: '100%', cursor: 'pointer' }} onClick={() => navigate('/perfil')}>Perfil</div>
+            <div style={{ backgroundColor: '#FFBF00', borderRadius: '8px', padding: '7px 0', textAlign: 'center', fontWeight: 800, fontSize: '13px', color: '#000', width: '100%', cursor: 'pointer' }} onClick={() => navigate('/referee-profile')}>Perfil</div>
             <svg width="70" height="70" viewBox="0 0 100 100" fill="none"><circle cx="50" cy="35" r="24" fill="#555" /><ellipse cx="50" cy="82" rx="34" ry="22" fill="#555" /></svg>
           </div>
         </div>

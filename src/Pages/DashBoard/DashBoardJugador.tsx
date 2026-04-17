@@ -262,7 +262,7 @@ const DashboardJugador = () => {
             display: 'flex', flexDirection: 'column',
           }}>
             <button
-              onClick={() => navigate('/perfil')}
+              onClick={() => navigate('/player-profile')}
               style={{
                 backgroundColor: '#FFBF00', border: 'none', width: '100%',
                 padding: '8px 16px', fontFamily: "'Montserrat', sans-serif",
