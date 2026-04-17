@@ -140,6 +140,9 @@ const RegisterPage = () => {
       if (!age) newErrors.age = 'La edad es requerida.';
       else if (parseInt(age) < 15 || parseInt(age) > 110) newErrors.age = 'Edad entre 15 y 110.';
       if (!gender) newErrors.gender = 'El género es requerido.';
+      if (!position) newErrors.position = 'La posición es requerida.';
+      if (!jerseyNumber) newErrors.jerseyNumber = 'El número dorsal es requerido.';
+      else if (parseInt(jerseyNumber) < 1 || parseInt(jerseyNumber) > 99) newErrors.jerseyNumber = 'El dorsal debe ser entre 1 y 99.';
       if (affiliation === 'estudiante' && !semester) newErrors.semester = 'El semestre es requerido.';
       if (affiliation === 'familia') {
         if (!relativeId) newErrors.relativeId = 'El ID del familiar es requerido.';
@@ -192,7 +195,14 @@ const RegisterPage = () => {
       }
       navigate('/account-created');
     } catch (err: any) {
-      setApiError(err.response?.data?.mensaje || 'Error al registrarse. Intenta de nuevo.');
+      const backendMsg = err.response?.data?.mensaje || err.response?.data?.error;
+      const fieldErrors = err.response?.data?.fields;
+      if (fieldErrors) {
+        const firstError = Object.values(fieldErrors)[0] as string;
+        setApiError(firstError);
+      } else {
+        setApiError(backendMsg || 'Error al registrarse. Intenta de nuevo.');
+      }
     } finally {
       setLoading(false);
     }
@@ -383,17 +393,19 @@ const RegisterPage = () => {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                 <div>
                   <label style={labelStyle}>Posición Preferida</label>
-                  <select value={position} onChange={(e) => setPosition(e.target.value)} style={{ ...inputStyle, color: position ? '#1a1a1a' : '#888' }}>
+                  <select value={position} onChange={(e) => setPosition(e.target.value)} style={{ ...inputStyle, color: position ? '#1a1a1a' : '#888', border: `1px solid ${errors.position ? '#ff4444' : '#ccc'}` }}>
                     <option value="">Selecciona posición</option>
                     <option value="GoalKeeper">Portero</option>
                     <option value="Defender">Defensa</option>
                     <option value="Midfielder">Mediocampista</option>
                     <option value="Winger">Extremo</option>
                   </select>
+                  {errorText('position')}
                 </div>
                 <div>
                   <label style={labelStyle}>Número de Camiseta</label>
-                  <input style={inputStyle} placeholder="1-99" value={jerseyNumber} onChange={(e) => setJerseyNumber(e.target.value)} type="number" min="1" max="99" />
+                  <input style={{ ...inputStyle, border: `1px solid ${errors.jerseyNumber ? '#ff4444' : '#ccc'}` }} placeholder="1-99" value={jerseyNumber} onChange={(e) => setJerseyNumber(e.target.value)} type="number" min="1" max="99" />
+                  {errorText('jerseyNumber')}
                 </div>
               </div>
 
