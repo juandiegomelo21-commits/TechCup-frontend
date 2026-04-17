@@ -4,7 +4,7 @@ import DashboardLayout from '../../Components/layout/DashboardLayout';
 import silbato from '../../assets/silbato.png';
 import tarjetaAmarilla from '../../assets/tarjetaAmarilla.png';
 import tarjetaRoja from '../../assets/tarjetaRoja.png';
-import { getRefereeByIdApi } from '../../api/refereeService';
+import { getRefereeByEmailApi } from '../../api/refereeService';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -44,9 +44,9 @@ const DashboardArbitro = () => {
   const [partidos, setPartidos] = useState<Partido[]>([]);
 
   useEffect(() => {
-    const userId = localStorage.getItem('userId');
-    if (!userId) return;
-    getRefereeByIdApi(userId)
+    const email = localStorage.getItem('email');
+    if (!email) return;
+    getRefereeByEmailApi(email)
       .then(referee => {
         const mapped: Partido[] = (referee.assignedMatches ?? []).map(m => {
           const { fecha, hora } = formatDateTime(m.dateTime);
