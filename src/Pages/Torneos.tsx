@@ -245,14 +245,16 @@ const Torneo = () => {
                   Inscribirse al Torneo
                 </button>
               )}
-              <button
-                onClick={() => navigate('/historial')}
-                style={OVAL_BUTTON_STYLE}
-                onMouseOver={e => (e.currentTarget.style.opacity = '0.9')}
-                onMouseOut={e => (e.currentTarget.style.opacity = '1')}
-              >
-                Ver Historial
-              </button>
+              {(rol === 'jugador' || rol === 'capitan') && (
+                <button
+                  onClick={() => navigate('/historial')}
+                  style={OVAL_BUTTON_STYLE}
+                  onMouseOver={e => (e.currentTarget.style.opacity = '0.9')}
+                  onMouseOut={e => (e.currentTarget.style.opacity = '1')}
+                >
+                  Ver Historial
+                </button>
+              )}
             </div>
           );
         })()}

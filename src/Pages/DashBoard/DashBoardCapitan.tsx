@@ -180,9 +180,9 @@ const DashboardCapitan = () => {
               </div>
             </div>
 
-            {/* Tus Estadísticas */}
+            {/* Mis Estadísticas */}
             <button
-              onClick={() => navigate('/estadisticas')}
+              onClick={() => navigate('/historial')}
               style={{
                 backgroundColor: '#FFBF00',
                 border: 'none',
@@ -196,7 +196,7 @@ const DashboardCapitan = () => {
                 cursor: 'pointer',
               }}
             >
-              Tus Estadísticas
+              Mis Estadísticas
             </button>
           </div>
         </div>
